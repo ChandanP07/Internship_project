@@ -1,0 +1,86 @@
+import { createDataProvider as createRestDataProvider } from "@refinedev/rest";
+import axios from "axios";
+import { BACKEND_BASE_URL } from "@/constants";
+
+// Ensure base URL doesn't end with a trailing slash to avoid double slashes in requests
+const API_URL = BACKEND_BASE_URL.endsWith("/") 
+  ? BACKEND_BASE_URL.slice(0, -1) 
+  : BACKEND_BASE_URL;
+
+const axiosInstance = axios.create({
+  withCredentials: true,
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => Promise.reject(error)
+);
+
+const baseDataProvider = createRestDataProvider(API_URL, axiosInstance);
+
+export const dataProvider = {
+  ...baseDataProvider,
+
+  getList: async ({ resource, pagination, filters, sorters }: any) => {
+    const url = `${API_URL}/${resource}`;
+    const params: any = {};
+
+    if (pagination) {
+      params.page = pagination.current ?? 1;
+      params.limit = pagination.pageSize ?? 10;
+    }
+
+    filters?.forEach((filter: any) => {
+      if ("field" in filter && filter.value !== undefined) {
+        const { field, value } = filter;
+        if (field === "role") params.role = value;
+        if (field === "search" || field === "name" || field === "email") params.search = value;
+        if (resource === "subjects" && field === "department") params.department = value;
+        if (resource === "classes" && field === "subject") params.subject = value;
+        if (resource === "classes" && field === "teacher") params.teacher = value;
+      }
+    });
+
+    const { data } = await axiosInstance.get(url, { params });
+    return {
+      data: data.data || [],
+      total: data.pagination?.total || data.data?.length || 0,
+    };
+  },
+
+  create: async ({ resource, variables }: any) => {
+    const { data } = await axiosInstance.post(`${API_URL}/${resource}`, variables);
+    return { data: data.data || data };
+  },
+
+  update: async ({ resource, id, variables }: any) => {
+    const { data } = await axiosInstance.put(`${API_URL}/${id ? `${resource}/${id}` : resource}`, variables);
+    return { data: data.data || data };
+  },
+
+  getOne: async ({ resource, id }: any) => {
+    const { data } = await axiosInstance.get(`${API_URL}/${resource}/${id}`);
+    return { data: data.data || data };
+  },
+
+  deleteOne: async ({ resource, id, variables }: any) => {
+    const { data } = await axiosInstance.delete(`${API_URL}/${resource}/${id}`, { data: variables });
+    return { data: data.data || data };
+  },
+
+  custom: async ({ url, method, payload, query, headers }: any) => {
+    // Determine if we need a slash between base and relative URL
+    const relativeUrl = url.startsWith("/") ? url.slice(1) : url;
+    const requestUrl = url.startsWith("http") ? url : `${API_URL}/${relativeUrl}`;
+
+    const { data } = await axiosInstance({
+      method,
+      url: requestUrl,
+      data: payload,
+      params: query,
+      headers,
+    });
+
+    return { data: data.data || data };
+  },
+};

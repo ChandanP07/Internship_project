@@ -1,0 +1,1 @@
+ALTER TABLE "classes" ALTER COLUMN "class_code" DROP NOT NULL;
