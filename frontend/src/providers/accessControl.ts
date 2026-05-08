@@ -78,6 +78,17 @@ export const accessControlProvider: AccessControlProvider = {
         return { can: true }; // Custom routes and backend handle specifics
       }
 
+      // --- Assignments Module ---
+      if (resource === "assignments") {
+        if (action === "list" || action === "show") {
+          return { can: true };
+        }
+        if (action === "create" || action === "edit" || action === "delete") {
+          return { can: role === "teacher" };
+        }
+        return { can: false };
+      }
+
       // Dashboard and other utility resources
       return { can: true };
     } catch (e) {

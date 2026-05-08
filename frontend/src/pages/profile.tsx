@@ -20,7 +20,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 const Profile = () => {
   const { data: user, isLoading } = useGetIdentity<User>();
-  const { mutate: updateProfile, isLoading: isUpdating } = useUpdate();
+  const { mutate: updateProfile } = useUpdate();
+  const isUpdating = false;
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),

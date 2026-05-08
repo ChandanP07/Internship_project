@@ -6,7 +6,7 @@ import routerProvider, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 import "./App.css";
 import { Toaster } from "./components/classora-ui/notification/toaster";
 import { useNotificationProvider } from "./components/classora-ui/notification/use-notification-provider";
@@ -16,6 +16,7 @@ import {
   BookOpen,
   Building2,
   ClipboardCheck,
+  ClipboardList,
   GraduationCap,
   Home,
   Users,
@@ -41,15 +42,18 @@ import FacultyList from "./pages/faculty/list";
 import FacultyShow from "./pages/faculty/show";
 import EnrollmentRequests from "./pages/enrollments/requests";
 import EnrollmentsJoin from "./pages/enrollments/join";
+import AssignmentsList from "./pages/assignments/list";
+import AssignmentsCreate from "./pages/assignments/create";
+import AssignmentsShow from "./pages/assignments/show";
 import Profile from "./pages/profile";
 import { User } from "./types";
 
 function EnrollmentRedirect() {
   const { data: user } = useGetIdentity<User>();
   if (user?.role === "teacher" || user?.role === "admin") {
-    return <NavigateToResource resource="enrollments" path="/enrollments/requests" />;
+    return <Navigate to="/enrollments/requests" replace />;
   }
-  return <NavigateToResource resource="enrollments" path="/enrollments/join" />;
+  return <Navigate to="/enrollments/join" replace />;
 }
 
 function App() {
@@ -90,6 +94,13 @@ function App() {
                   name: "enrollments",
                   list: "/enrollments",
                   meta: { label: "Enrollments", icon: <ClipboardCheck /> },
+                },
+                {
+                  name: "assignments",
+                  list: "/assignments",
+                  create: "/assignments/create",
+                  show: "/assignments/show/:id",
+                  meta: { label: "Assignments", icon: <ClipboardList /> },
                 },
                 {
                   name: "subjects",
@@ -160,6 +171,24 @@ function App() {
                     <Route index element={<EnrollmentRedirect />} />
                     <Route path="requests" element={<EnrollmentRequests />} />
                     <Route path="join" element={<EnrollmentsJoin />} />
+                  </Route>
+
+                  {/* Assignments */}
+                  <Route path="assignments">
+                    <Route index element={<AssignmentsList />} />
+                    <Route
+                      path="create"
+                      element={
+                        <CanAccess
+                          resource="assignments"
+                          action="create"
+                          fallback={<AccessDenied />}
+                        >
+                          <AssignmentsCreate />
+                        </CanAccess>
+                      }
+                    />
+                    <Route path="show/:id" element={<AssignmentsShow />} />
                   </Route>
 
                   {/* Subjects */}

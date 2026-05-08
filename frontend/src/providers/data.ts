@@ -1,4 +1,4 @@
-import { createDataProvider as createRestDataProvider } from "@refinedev/rest";
+import type { DataProvider } from "@refinedev/core";
 import axios from "axios";
 import { BACKEND_BASE_URL } from "@/constants";
 
@@ -16,12 +16,10 @@ axiosInstance.interceptors.response.use(
   (error) => Promise.reject(error)
 );
 
-const baseDataProvider = createRestDataProvider(API_URL, axiosInstance);
+export const dataProvider: DataProvider = {
+  getApiUrl: () => API_URL,
 
-export const dataProvider = {
-  ...baseDataProvider,
-
-  getList: async ({ resource, pagination, filters, sorters }: any) => {
+  getList: async ({ resource, pagination, filters }: any) => {
     const url = `${API_URL}/${resource}`;
     const params: any = {};
 
@@ -33,6 +31,7 @@ export const dataProvider = {
     filters?.forEach((filter: any) => {
       if ("field" in filter && filter.value !== undefined) {
         const { field, value } = filter;
+        params[field] = value;
         if (field === "role") params.role = value;
         if (field === "search" || field === "name" || field === "email") params.search = value;
         if (resource === "subjects" && field === "department") params.department = value;

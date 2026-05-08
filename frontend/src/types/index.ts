@@ -109,6 +109,7 @@ export type ClassDetails = {
   teacher?: User;
   department?: Department;
   schedules: Schedule[];
+  classCode?: string;
   inviteCode?: string;
 };
 

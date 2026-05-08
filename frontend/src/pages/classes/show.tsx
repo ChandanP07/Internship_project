@@ -1,5 +1,5 @@
 import { AdvancedImage } from "@cloudinary/react";
-import { useShow, useGetIdentity } from "@refinedev/core";
+import { useShow, useGetIdentity, useList } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
@@ -42,6 +42,17 @@ const ClassesShow = () => {
   const isAdmin = currentUser?.role === "admin";
   const isTeacher = currentUser?.role === "teacher";
   const isStudent = currentUser?.role === "student";
+  const { result: assignmentsResult } = useList<any>({
+    resource: "assignments",
+    filters: [
+      { field: "classId", operator: "eq", value: Number(classId) },
+    ],
+    pagination: { pageSize: 5 },
+    queryOptions: {
+      enabled: Number.isFinite(Number(classId)),
+    },
+  });
+  const assignments = assignmentsResult.data ?? [];
 
   const studentColumns = useMemo<ColumnDef<ClassUser>[]>(
     () => [
@@ -215,6 +226,39 @@ const ClassesShow = () => {
                     </CardContent>
                 </Card>
             )}
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Assignments</CardTitle>
+                  <CardDescription>Latest assignments for this class</CardDescription>
+                </div>
+                {(isAdmin || isTeacher) && (
+                  <Button size="sm" onClick={() => navigate("/assignments/create")}>
+                    Create
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {assignments.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No assignments yet.</p>
+                ) : (
+                  assignments.map((assignment: any) => (
+                    <div key={assignment.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{assignment.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Due {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : "N/A"}
+                        </p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => navigate(`/assignments/show/${assignment.id}`)}>
+                        View
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
 
             {isStudent && (
                  <Card className="bg-emerald-50 border-emerald-100 dark:bg-emerald-950 dark:border-emerald-900">

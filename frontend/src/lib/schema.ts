@@ -69,3 +69,23 @@ export const enrollmentSchema = z.object({
     .min(1, "Class ID is required"),
   studentId: z.string().min(1, "Student ID is required"),
 });
+
+export const assignmentSchema = z.object({
+  classId: z.coerce
+    .number({
+      required_error: "Class is required",
+      invalid_type_error: "Class is required",
+    })
+    .min(1, "Class is required"),
+  title: z.string().min(3, "Title must be at least 3 characters"),
+  description: z.string().min(5, "Description must be at least 5 characters"),
+  dueDate: z.string().min(1, "Due date is required"),
+  totalMarks: z.coerce
+    .number({
+      required_error: "Total marks is required",
+      invalid_type_error: "Total marks is required",
+    })
+    .min(1, "Total marks must be at least 1"),
+  attachmentUrl: z.string().url("Attachment URL must be valid").optional().or(z.literal("")),
+  status: z.enum(["draft", "published", "closed"]).default("published"),
+});

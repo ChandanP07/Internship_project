@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useLink, useCustom, useGetIdentity } from "@refinedev/core";
+import { useNavigate } from "react-router";
 import {
   Bar,
   BarChart,
@@ -35,23 +36,24 @@ const roleColors = ["#f97316", "#0ea5e9", "#22c55e", "#a855f7"];
 
 const Dashboard = () => {
   const Link = useLink();
+  const navigate = useNavigate();
   const { data: currentUser } = useGetIdentity<User>();
   const role = currentUser?.role;
 
   // Fetch role-specific overview
-  const { data: overviewData, isLoading: isOverviewLoading } = useCustom<any>({
+  const { query: overviewQuery } = useCustom<any>({
     url: "stats/overview",
     method: "get",
   });
 
   // Fetch role-specific latest activity
-  const { data: latestData, isLoading: isLatestLoading } = useCustom<any>({
+  const { query: latestQuery } = useCustom<any>({
     url: "stats/latest",
     method: "get",
   });
 
   // Fetch charts (Admin & Teacher)
-  const { data: chartsData, isLoading: isChartsLoading } = useCustom<any>({
+  const { query: chartsQuery } = useCustom<any>({
     url: "stats/charts",
     method: "get",
     queryOptions: {
@@ -59,9 +61,11 @@ const Dashboard = () => {
     },
   });
 
-  const overview = overviewData?.data ?? {};
-  const latest = latestData?.data ?? {};
-  const charts = chartsData?.data ?? {};
+  const overview = overviewQuery.data?.data ?? {};
+  const latest = latestQuery.data?.data ?? {};
+  const charts = chartsQuery.data?.data ?? {};
+  const isOverviewLoading = overviewQuery.isLoading;
+  const isLatestLoading = latestQuery.isLoading;
 
   const kpis = useMemo(() => {
     if (role === "admin") {
