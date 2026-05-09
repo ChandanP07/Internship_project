@@ -53,9 +53,7 @@ export const dataProvider: DataProvider = {
   },
 
   update: async ({ resource, id, variables }: any) => {
-    // Use PATCH for enrollment updates (approve/reject actions)
-    const method = resource === "enrollments" ? "patch" : "put";
-    const { data } = await axiosInstance[method](`${API_URL}/${id ? `${resource}/${id}` : resource}`, variables);
+    const { data } = await axiosInstance.put(`${API_URL}/${id ? `${resource}/${id}` : resource}`, variables);
     return { data: data.data || data };
   },
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { type BaseKey, useCreateButton } from "@refinedev/core";
-import { Plus } from "lucide-react";
+import { type BaseKey, useListButton } from "@refinedev/core";
+import { List } from "lucide-react";
 import React from "react";
-import { useCanAccess } from "@/hooks/use-can-access";
 
-type CreateButtonProps = {
+type ListButtonProps = {
   /**
    * Resource name for API data interactions. `identifier` of the resource can be used instead of the `name` of the resource.
    * @default Inferred resource name from the route
@@ -26,20 +25,18 @@ type CreateButtonProps = {
   meta?: Record<string, unknown>;
 } & React.ComponentProps<typeof Button>;
 
-export const CreateButton = React.forwardRef<
+export const ListButton = React.forwardRef<
   React.ComponentRef<typeof Button>,
-  CreateButtonProps
+  ListButtonProps
 >(({ resource, accessControl, meta, children, onClick, ...rest }, ref) => {
-  const { hidden, disabled, LinkComponent, to, label } = useCreateButton({
+  const { hidden, disabled, LinkComponent, to, label } = useListButton({
     resource,
     accessControl,
     meta,
   });
 
-  const canAccess = useCanAccess(resource || "", "create");
-
   const isDisabled = disabled || rest.disabled;
-  const isHidden = hidden || rest.hidden || !canAccess;
+  const isHidden = hidden || rest.hidden;
 
   if (isHidden) return null;
 
@@ -61,8 +58,8 @@ export const CreateButton = React.forwardRef<
       >
         {children ?? (
           <div className="flex items-center gap-2 font-semibold">
-            <Plus className="w-4 h-4" />
-            <span>{label ?? "Create"}</span>
+            <List className="w-4 h-4" />
+            <span>{label}</span>
           </div>
         )}
       </LinkComponent>
@@ -70,4 +67,4 @@ export const CreateButton = React.forwardRef<
   );
 });
 
-CreateButton.displayName = "CreateButton";
+ListButton.displayName = "ListButton";

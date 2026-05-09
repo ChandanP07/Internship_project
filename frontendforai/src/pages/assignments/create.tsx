@@ -156,9 +156,9 @@ const AssignmentsCreate = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem key="draft" value="draft">Draft</SelectItem>
-                  <SelectItem key="published" value="published">Published</SelectItem>
-                  <SelectItem key="closed" value="closed">Closed</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>

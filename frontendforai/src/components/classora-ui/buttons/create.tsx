@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { type BaseKey, useCreateButton } from "@refinedev/core";
 import { Plus } from "lucide-react";
 import React from "react";
-import { useCanAccess } from "@/hooks/use-can-access";
 
 type CreateButtonProps = {
   /**
@@ -36,10 +35,8 @@ export const CreateButton = React.forwardRef<
     meta,
   });
 
-  const canAccess = useCanAccess(resource || "", "create");
-
   const isDisabled = disabled || rest.disabled;
-  const isHidden = hidden || rest.hidden || !canAccess;
+  const isHidden = hidden || rest.hidden;
 
   if (isHidden) return null;
 

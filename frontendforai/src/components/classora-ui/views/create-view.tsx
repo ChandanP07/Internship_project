@@ -1,48 +1,47 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-
-import { CreateButton } from "@/components/classora-ui/buttons/create";
 import { Breadcrumb } from "@/components/classora-ui/layout/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useResourceParams, useUserFriendlyName } from "@refinedev/core";
-import { useCanAccess } from "@/hooks/use-can-access";
+import {
+  useBack,
+  useResourceParams,
+  useUserFriendlyName,
+} from "@refinedev/core";
+import { ArrowLeftIcon } from "lucide-react";
+import type { PropsWithChildren } from "react";
 
-type ListViewProps = PropsWithChildren<{
+type CreateViewProps = PropsWithChildren<{
   className?: string;
 }>;
 
-export function ListView({ children, className }: ListViewProps) {
+export function CreateView({ children, className }: CreateViewProps) {
   return (
     <div className={cn("flex flex-col", "gap-4", className)}>{children}</div>
   );
 }
 
-type ListHeaderProps = PropsWithChildren<{
+type CreateHeaderProps = PropsWithChildren<{
   resource?: string;
   title?: string;
-  canCreate?: boolean;
-  headerClassName?: string;
   wrapperClassName?: string;
+  headerClassName?: string;
 }>;
 
-export const ListViewHeader = ({
-  canCreate,
+export const CreateViewHeader = ({
   resource: resourceFromProps,
   title: titleFromProps,
   wrapperClassName,
   headerClassName,
-}: ListHeaderProps) => {
+}: CreateHeaderProps) => {
+  const back = useBack();
+
   const getUserFriendlyName = useUserFriendlyName();
 
   const { resource, identifier } = useResourceParams({
     resource: resourceFromProps,
   });
-  const resourceName = identifier ?? resource?.name;
-
-  const hasAccess = useCanAccess(resourceName || "", "create");
-  const isCreateButtonVisible = (canCreate ?? !!resource?.create) && hasAccess;
 
   const title =
     titleFromProps ??
@@ -59,16 +58,22 @@ export const ListViewHeader = ({
         </div>
         <Separator className={cn("absolute", "left-0", "right-0", "z-[1]")} />
       </div>
-      <div className={cn("flex", "justify-between", "gap-4", headerClassName)}>
-        <h2 className="text-2xl font-bold">{title}</h2>
-        {isCreateButtonVisible && (
-          <div className="flex items-center gap-2">
-            <CreateButton resource={resourceName} />
-          </div>
+      <div
+        className={cn(
+          "flex",
+          "gap-1",
+          "items-center",
+          "-ml-2.5",
+          headerClassName
         )}
+      >
+        <Button variant="ghost" size="icon" onClick={back}>
+          <ArrowLeftIcon className="h-4 w-4" />
+        </Button>
+        <h2 className="text-2xl font-bold">{title}</h2>
       </div>
     </div>
   );
 };
 
-ListView.displayName = "ListView";
+CreateView.displayName = "CreateView";

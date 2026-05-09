@@ -7,7 +7,6 @@ import { Breadcrumb } from "@/components/classora-ui/layout/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useResourceParams, useUserFriendlyName } from "@refinedev/core";
-import { useCanAccess } from "@/hooks/use-can-access";
 
 type ListViewProps = PropsWithChildren<{
   className?: string;
@@ -41,8 +40,7 @@ export const ListViewHeader = ({
   });
   const resourceName = identifier ?? resource?.name;
 
-  const hasAccess = useCanAccess(resourceName || "", "create");
-  const isCreateButtonVisible = (canCreate ?? !!resource?.create) && hasAccess;
+  const isCreateButtonVisible = canCreate ?? !!resource?.create;
 
   const title =
     titleFromProps ??

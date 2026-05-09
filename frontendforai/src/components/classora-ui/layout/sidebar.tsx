@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
-  useGetIdentity,
   useLink,
   useMenu,
   useRefineOptions,
@@ -30,35 +29,10 @@ import {
 } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
-import { User } from "@/types";
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
-  const { data: user } = useGetIdentity<User>();
-
-  // Filter menu items based on user role
-  const filteredMenuItems = menuItems.filter((item: TreeMenuItem) => {
-    if (!user) return false;
-
-    const { role } = user;
-    const resourceName = item.name;
-
-    // Admin sees everything
-    if (role === "admin") return true;
-
-    // Students only see dashboard, classes, enrollments, assignments
-    if (role === "student") {
-      return ["dashboard", "classes", "enrollments", "assignments"].includes(resourceName);
-    }
-
-    // Teachers see everything except users/faculty (they can only view, not manage)
-    if (role === "teacher") {
-      return resourceName !== "users";
-    }
-
-    return true;
-  });
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
@@ -81,7 +55,7 @@ export function Sidebar() {
           }
         )}
       >
-        {filteredMenuItems.map((item: TreeMenuItem) => (
+        {menuItems.map((item: TreeMenuItem) => (
           <SidebarItem
             key={item.key || item.name}
             item={item}
