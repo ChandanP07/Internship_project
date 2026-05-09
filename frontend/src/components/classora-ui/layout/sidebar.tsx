@@ -30,33 +30,20 @@ import {
 } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
-import { User } from "@/types";
+import type { User } from "@/types";
+
+const STUDENT_HIDDEN_RESOURCES = ["departments", "subjects", "users"];
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
-  const { data: user } = useGetIdentity<User>();
+  const { data: identity } = useGetIdentity<User>();
+  const role = identity?.role;
 
-  // Filter menu items based on user role
-  const filteredMenuItems = menuItems.filter((item: TreeMenuItem) => {
-    if (!user) return false;
-
-    const { role } = user;
-    const resourceName = item.name;
-
-    // Admin sees everything
-    if (role === "admin") return true;
-
-    // Students only see dashboard, classes, enrollments, assignments
-    if (role === "student") {
-      return ["dashboard", "classes", "enrollments", "assignments"].includes(resourceName);
+  const visibleItems = menuItems.filter((item: TreeMenuItem) => {
+    if (role === "student" && STUDENT_HIDDEN_RESOURCES.includes(item.name)) {
+      return false;
     }
-
-    // Teachers see everything except users/faculty (they can only view, not manage)
-    if (role === "teacher") {
-      return resourceName !== "users";
-    }
-
     return true;
   });
 
@@ -81,7 +68,7 @@ export function Sidebar() {
           }
         )}
       >
-        {filteredMenuItems.map((item: TreeMenuItem) => (
+        {visibleItems.map((item: TreeMenuItem) => (
           <SidebarItem
             key={item.key || item.name}
             item={item}
@@ -231,7 +218,6 @@ function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
 
 function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
   const isSelected = item.key === selectedKey;
-
   return <SidebarButton item={item} isSelected={isSelected} asLink={true} />;
 }
 

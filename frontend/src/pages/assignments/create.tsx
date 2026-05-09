@@ -1,13 +1,30 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { useCreate, useGetIdentity, useList, useNavigation } from "@refinedev/core";
-
+import {
+  useCreate,
+  useGetIdentity,
+  useList,
+  useNavigation,
+} from "@refinedev/core";
 import { assignmentSchema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { User } from "@/types";
+
 type ClassItem = { id: number; name: string };
 
 const AssignmentsCreate = () => {
@@ -26,16 +43,20 @@ const AssignmentsCreate = () => {
     attachmentUrl: "",
   });
 
-  const { result: classResult } = useList<ClassItem>({
+  const { query: classQuery } = useList<ClassItem>({
     resource: "classes",
     pagination: { pageSize: 200 },
   });
+  const classes = classQuery.data?.data ?? [];
 
-  const classes = classResult.data ?? [];
-
-  const canManage = currentUser?.role === "admin" || currentUser?.role === "teacher";
+  const canManage =
+    currentUser?.role === "admin" || currentUser?.role === "teacher";
   if (!canManage) {
-    return <p className="text-sm text-red-500">You do not have permission to create assignments.</p>;
+    return (
+      <p className="text-sm text-red-500">
+        You do not have permission to create assignments.
+      </p>
+    );
   }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -82,7 +103,9 @@ const AssignmentsCreate = () => {
     <Card>
       <CardHeader>
         <CardTitle>Create Assignment</CardTitle>
-        <CardDescription>Set up assignment details, due date and marks.</CardDescription>
+        <CardDescription>
+          Set up assignment details, due date and marks.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -90,14 +113,16 @@ const AssignmentsCreate = () => {
             <p className="text-sm font-medium">Class</p>
             <Select
               value={values.classId}
-              onValueChange={(v) => setValues((prev) => ({ ...prev, classId: v }))}
+              onValueChange={(v) =>
+                setValues((prev) => ({ ...prev, classId: v }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select class" />
               </SelectTrigger>
               <SelectContent>
                 {classes.map((item: ClassItem) => (
-                  <SelectItem key={item.id} value={String(item.id)}>
+                  <SelectItem key={`class-${item.id}`} value={String(item.id)}>
                     {item.name}
                   </SelectItem>
                 ))}
@@ -109,7 +134,9 @@ const AssignmentsCreate = () => {
             <p className="text-sm font-medium">Title</p>
             <Input
               value={values.title}
-              onChange={(e) => setValues((prev) => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setValues((prev) => ({ ...prev, title: e.target.value }))
+              }
               placeholder="Assignment title"
             />
           </div>
@@ -118,7 +145,9 @@ const AssignmentsCreate = () => {
             <p className="text-sm font-medium">Description</p>
             <Textarea
               value={values.description}
-              onChange={(e) => setValues((prev) => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setValues((prev) => ({ ...prev, description: e.target.value }))
+              }
               placeholder="Assignment instructions"
               rows={5}
             />
@@ -129,16 +158,19 @@ const AssignmentsCreate = () => {
               <p className="text-sm font-medium">Due Date</p>
               <Input
                 value={dueDateValue}
-                onChange={(e) => setValues((prev) => ({ ...prev, dueDate: e.target.value }))}
+                onChange={(e) =>
+                  setValues((prev) => ({ ...prev, dueDate: e.target.value }))
+                }
                 type="datetime-local"
               />
             </div>
-
             <div className="space-y-2">
               <p className="text-sm font-medium">Total Marks</p>
               <Input
                 value={values.totalMarks}
-                onChange={(e) => setValues((prev) => ({ ...prev, totalMarks: e.target.value }))}
+                onChange={(e) =>
+                  setValues((prev) => ({ ...prev, totalMarks: e.target.value }))
+                }
                 type="number"
                 min={1}
               />
@@ -150,24 +182,30 @@ const AssignmentsCreate = () => {
               <p className="text-sm font-medium">Status</p>
               <Select
                 value={values.status}
-                onValueChange={(v) => setValues((prev) => ({ ...prev, status: v }))}
+                onValueChange={(v) =>
+                  setValues((prev) => ({ ...prev, status: v }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem key="draft" value="draft">Draft</SelectItem>
-                  <SelectItem key="published" value="published">Published</SelectItem>
-                  <SelectItem key="closed" value="closed">Closed</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
               <p className="text-sm font-medium">Attachment URL (optional)</p>
               <Input
                 value={values.attachmentUrl}
-                onChange={(e) => setValues((prev) => ({ ...prev, attachmentUrl: e.target.value }))}
+                onChange={(e) =>
+                  setValues((prev) => ({
+                    ...prev,
+                    attachmentUrl: e.target.value,
+                  }))
+                }
                 placeholder="https://..."
               />
             </div>

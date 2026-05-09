@@ -1,5 +1,5 @@
 import express from "express";
-import { and, desc, eq, getTableColumns, or, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, or } from "drizzle-orm";
 
 import { db } from "../db/index";
 import { classes, departments, enrollments, subjects, user } from "../db/schema/index";
@@ -38,7 +38,7 @@ const getEnrollmentDetails = async (enrollmentId: number) => {
 router.get("/", requireAuth(), async (req: any, res) => {
   try {
     const authUser = req.user;
-    
+
     let query = db
       .select({
         ...getTableColumns(enrollments),
@@ -80,10 +80,12 @@ router.get("/pending", requireAuth(["teacher", "admin"]), async (req: any, res) 
       .from(enrollments)
       .leftJoin(classes, eq(enrollments.classId, classes.id))
       .leftJoin(user, eq(enrollments.studentId, user.id))
-      .where(and(
-        eq(enrollments.status, "pending"),
-        authUser.role === "teacher" ? eq(classes.teacherId, authUser.id) : undefined
-      ));
+      .where(
+        and(
+          eq(enrollments.status, "pending"),
+          authUser.role === "teacher" ? eq(classes.teacherId, authUser.id) : undefined
+        )
+      );
 
     const results = await query.orderBy(desc(enrollments.createdAt));
     res.status(200).json({ data: results });
@@ -110,19 +112,22 @@ router.post("/join", requireAuth(["student"]), async (req: any, res) => {
     const [existingEnrollment] = await db
       .select({ id: enrollments.id })
       .from(enrollments)
-      .where(and(
-        eq(enrollments.classId, classRecord.id),
-        eq(enrollments.studentId, authUser.id)
-      ));
+      .where(
+        and(
+          eq(enrollments.classId, classRecord.id),
+          eq(enrollments.studentId, authUser.id)
+        )
+      );
 
-    if (existingEnrollment) return res.status(409).json({ error: "Already enrolled or request pending" });
+    if (existingEnrollment)
+      return res.status(409).json({ error: "Already enrolled or request pending" });
 
     const [createdEnrollment] = await db
       .insert(enrollments)
-      .values({ 
-        classId: classRecord.id, 
+      .values({
+        classId: classRecord.id,
         studentId: authUser.id,
-        status: "pending"
+        status: "pending",
       })
       .returning({ id: enrollments.id });
 
@@ -133,17 +138,17 @@ router.post("/join", requireAuth(["student"]), async (req: any, res) => {
   }
 });
 
-// Approve/Reject enrollment (Teacher)
-router.patch("/:id", requireAuth(["teacher", "admin"]), async (req: any, res) => {
+// Approve/Reject enrollment — supports both PATCH and PUT for client compatibility
+const handleEnrollmentAction = async (req: any, res: any) => {
   try {
     const enrollmentId = Number(req.params.id);
     const { action } = req.body; // "approve" | "reject"
     const authUser = req.user;
 
     const [enrollment] = await db
-      .select({ 
+      .select({
         id: enrollments.id,
-        teacherId: classes.teacherId 
+        teacherId: classes.teacherId,
       })
       .from(enrollments)
       .leftJoin(classes, eq(enrollments.classId, classes.id))
@@ -151,13 +156,15 @@ router.patch("/:id", requireAuth(["teacher", "admin"]), async (req: any, res) =>
 
     if (!enrollment) return res.status(404).json({ error: "Enrollment not found" });
 
-    // Only teacher of that class or admin can modify
     if (authUser.role === "teacher" && enrollment.teacherId !== authUser.id) {
       return res.status(403).json({ error: "Forbidden: Not your class" });
     }
 
     if (action === "approve") {
-      await db.update(enrollments).set({ status: "approved" }).where(eq(enrollments.id, enrollmentId));
+      await db
+        .update(enrollments)
+        .set({ status: "approved" })
+        .where(eq(enrollments.id, enrollmentId));
     } else if (action === "reject") {
       await db.delete(enrollments).where(eq(enrollments.id, enrollmentId));
     } else {
@@ -168,7 +175,10 @@ router.patch("/:id", requireAuth(["teacher", "admin"]), async (req: any, res) =>
   } catch (error) {
     res.status(500).json({ error: "Failed to process enrollment" });
   }
-});
+};
+
+router.patch("/:id", requireAuth(["teacher", "admin"]), handleEnrollmentAction);
+router.put("/:id", requireAuth(["teacher", "admin"]), handleEnrollmentAction);
 
 // Delete enrollment (leave class or remove student)
 router.delete("/:id", requireAuth(), async (req: any, res) => {
@@ -185,7 +195,8 @@ router.delete("/:id", requireAuth(), async (req: any, res) => {
     if (!enrollment) return res.status(404).json({ error: "Enrollment not found" });
 
     const isOwner = authUser.role === "student" && enrollment.studentId === authUser.id;
-    const isTeacherOfClass = authUser.role === "teacher" && enrollment.teacherId === authUser.id;
+    const isTeacherOfClass =
+      authUser.role === "teacher" && enrollment.teacherId === authUser.id;
     const isAdmin = authUser.role === "admin";
 
     if (!isOwner && !isTeacherOfClass && !isAdmin) {

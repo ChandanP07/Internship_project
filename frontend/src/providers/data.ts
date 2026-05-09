@@ -2,9 +2,8 @@ import type { DataProvider } from "@refinedev/core";
 import axios from "axios";
 import { BACKEND_BASE_URL } from "@/constants";
 
-// Ensure base URL doesn't end with a trailing slash to avoid double slashes in requests
-const API_URL = BACKEND_BASE_URL.endsWith("/") 
-  ? BACKEND_BASE_URL.slice(0, -1) 
+const API_URL = BACKEND_BASE_URL.endsWith("/")
+  ? BACKEND_BASE_URL.slice(0, -1)
   : BACKEND_BASE_URL;
 
 const axiosInstance = axios.create({
@@ -52,10 +51,14 @@ export const dataProvider: DataProvider = {
     return { data: data.data || data };
   },
 
-  update: async ({ resource, id, variables }: any) => {
-    // Use PATCH for enrollment updates (approve/reject actions)
-    const method = resource === "enrollments" ? "patch" : "put";
-    const { data } = await axiosInstance[method](`${API_URL}/${id ? `${resource}/${id}` : resource}`, variables);
+  update: async ({ resource, id, variables, meta }: any) => {
+    // Use PATCH by default (backend uses PATCH for partial updates).
+    // Pass meta.method = "put" to force PUT if needed.
+    const method = meta?.method === "put" ? "put" : "patch";
+    const { data } = await axiosInstance[method](
+      `${API_URL}/${id ? `${resource}/${id}` : resource}`,
+      variables
+    );
     return { data: data.data || data };
   },
 
@@ -65,12 +68,13 @@ export const dataProvider: DataProvider = {
   },
 
   deleteOne: async ({ resource, id, variables }: any) => {
-    const { data } = await axiosInstance.delete(`${API_URL}/${resource}/${id}`, { data: variables });
+    const { data } = await axiosInstance.delete(`${API_URL}/${resource}/${id}`, {
+      data: variables,
+    });
     return { data: data.data || data };
   },
 
   custom: async ({ url, method, payload, query, headers }: any) => {
-    // Determine if we need a slash between base and relative URL
     const relativeUrl = url.startsWith("/") ? url.slice(1) : url;
     const requestUrl = url.startsWith("http") ? url : `${API_URL}/${relativeUrl}`;
 

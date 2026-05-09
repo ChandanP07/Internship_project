@@ -4,25 +4,13 @@ import { Button } from "@/components/ui/button";
 import { type BaseKey, useCreateButton } from "@refinedev/core";
 import { Plus } from "lucide-react";
 import React from "react";
-import { useCanAccess } from "@/hooks/use-can-access";
 
 type CreateButtonProps = {
-  /**
-   * Resource name for API data interactions. `identifier` of the resource can be used instead of the `name` of the resource.
-   * @default Inferred resource name from the route
-   */
   resource?: BaseKey;
-  /**
-   * Access Control configuration for the button
-   * @default `{ enabled: true, hideIfUnauthorized: false }`
-   */
   accessControl?: {
     enabled?: boolean;
     hideIfUnauthorized?: boolean;
   };
-  /**
-   * `meta` property is used when creating the URL for the related action and path.
-   */
   meta?: Record<string, unknown>;
 } & React.ComponentProps<typeof Button>;
 
@@ -32,14 +20,12 @@ export const CreateButton = React.forwardRef<
 >(({ resource, accessControl, meta, children, onClick, ...rest }, ref) => {
   const { hidden, disabled, LinkComponent, to, label } = useCreateButton({
     resource,
-    accessControl,
+    accessControl: accessControl ?? { enabled: true, hideIfUnauthorized: true },
     meta,
   });
 
-  const canAccess = useCanAccess(resource || "", "create");
-
   const isDisabled = disabled || rest.disabled;
-  const isHidden = hidden || rest.hidden || !canAccess;
+  const isHidden = hidden || rest.hidden;
 
   if (isHidden) return null;
 

@@ -1,9 +1,14 @@
 import { useGetIdentity, useList } from "@refinedev/core";
 import { Link } from "react-router";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { User } from "@/types";
 
 type AssignmentItem = {
@@ -20,21 +25,19 @@ type AssignmentItem = {
 
 const AssignmentsList = () => {
   const { data: currentUser } = useGetIdentity<User>();
-  const { query, result } = useList<AssignmentItem>({
+  const { query } = useList<AssignmentItem>({
     resource: "assignments",
     pagination: { pageSize: 50 },
   });
 
-  const assignments = result.data ?? [];
-  const canCreate = currentUser?.role === "admin" || currentUser?.role === "teacher";
+  const assignments = query.data?.data ?? [];
+  const canCreate =
+    currentUser?.role === "admin" || currentUser?.role === "teacher";
 
-  if (query.isLoading) {
+  if (query.isLoading)
     return <p className="text-sm text-muted-foreground">Loading assignments...</p>;
-  }
-
-  if (query.isError) {
+  if (query.isError)
     return <p className="text-sm text-red-500">Failed to load assignments.</p>;
-  }
 
   return (
     <div className="space-y-4">
@@ -79,10 +82,15 @@ const AssignmentsList = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {item.description}
+                </p>
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    Total Marks: <span className="font-medium text-foreground">{item.totalMarks}</span>
+                    Total Marks:{" "}
+                    <span className="font-medium text-foreground">
+                      {item.totalMarks}
+                    </span>
                   </p>
                   <Button size="sm" variant="outline" asChild>
                     <Link to={`/assignments/show/${item.id}`}>View</Link>

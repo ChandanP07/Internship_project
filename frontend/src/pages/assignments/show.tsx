@@ -1,9 +1,21 @@
-import { useDelete, useGetIdentity, useNavigation, useShow, useUpdate } from "@refinedev/core";
+import { useState } from "react";
+import {
+  useDelete,
+  useGetIdentity,
+  useNavigation,
+  useShow,
+  useUpdate,
+} from "@refinedev/core";
 import { useParams } from "react-router";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { User } from "@/types";
 
 type AssignmentRecord = {
@@ -25,8 +37,8 @@ const AssignmentsShow = () => {
   const { list } = useNavigation();
   const { mutate: deleteOne } = useDelete();
   const { mutate: updateStatus } = useUpdate();
-  const isDeleting = false;
-  const isUpdating = false;
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const { query } = useShow<AssignmentRecord>({
     resource: "assignments",
@@ -34,15 +46,15 @@ const AssignmentsShow = () => {
   });
 
   const record = query.data?.data;
-  const canManage = currentUser?.role === "admin" || currentUser?.role === "teacher";
+  const canManage =
+    currentUser?.role === "admin" || currentUser?.role === "teacher";
 
-  if (query.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading assignment...</p>;
-  }
-
-  if (query.isError || !record) {
+  if (query.isLoading)
+    return (
+      <p className="text-sm text-muted-foreground">Loading assignment...</p>
+    );
+  if (query.isError || !record)
     return <p className="text-sm text-red-500">Failed to load assignment.</p>;
-  }
 
   const nextStatus = record.status === "published" ? "closed" : "published";
 
@@ -67,15 +79,26 @@ const AssignmentsShow = () => {
 
         <div className="grid gap-2 text-sm text-muted-foreground">
           <p>
-            Total Marks: <span className="font-medium text-foreground">{record.totalMarks}</span>
+            Total Marks:{" "}
+            <span className="font-medium text-foreground">
+              {record.totalMarks}
+            </span>
           </p>
           {record.teacher && (
             <p>
-              Created By: <span className="font-medium text-foreground">{record.teacher.name}</span>
+              Created By:{" "}
+              <span className="font-medium text-foreground">
+                {record.teacher.name}
+              </span>
             </p>
           )}
           {record.attachmentUrl && (
-            <a className="text-primary underline" href={record.attachmentUrl} target="_blank" rel="noreferrer">
+            <a
+              className="text-primary underline"
+              href={record.attachmentUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
               Open Attachment
             </a>
           )}
@@ -86,25 +109,33 @@ const AssignmentsShow = () => {
             <Button
               variant="outline"
               disabled={isUpdating}
-              onClick={() =>
-                updateStatus({
-                  resource: "assignments/status",
-                  id: record.id,
-                  values: { status: nextStatus },
-                })
-              }
+              onClick={() => {
+                setIsUpdating(true);
+                updateStatus(
+                  {
+                    resource: "assignments",
+                    id: record.id,
+                    values: { status: nextStatus },
+                  },
+                  { onSettled: () => setIsUpdating(false) }
+                );
+              }}
             >
               {isUpdating ? "Updating..." : `Mark as ${nextStatus}`}
             </Button>
             <Button
               variant="destructive"
               disabled={isDeleting}
-              onClick={() =>
+              onClick={() => {
+                setIsDeleting(true);
                 deleteOne(
                   { resource: "assignments", id: record.id },
-                  { onSuccess: () => list("assignments") }
-                )
-              }
+                  {
+                    onSuccess: () => list("assignments"),
+                    onSettled: () => setIsDeleting(false),
+                  }
+                );
+              }}
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>

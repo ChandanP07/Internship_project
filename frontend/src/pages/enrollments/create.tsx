@@ -43,9 +43,7 @@ const EnrollmentsCreate = () => {
 
   const { query: classesQuery } = useList<ClassDetails>({
     resource: "classes",
-    pagination: {
-      pageSize: 100,
-    },
+    pagination: { pageSize: 100 },
   });
 
   const classes = classesQuery.data?.data ?? [];
@@ -53,9 +51,7 @@ const EnrollmentsCreate = () => {
 
   const form = useForm<EnrollFormValues>({
     resolver: zodResolver(enrollSchema),
-    defaultValues: {
-      classId: 0,
-    },
+    defaultValues: { classId: 0 },
   });
 
   const selectedClassId = form.watch("classId");
@@ -71,11 +67,7 @@ const EnrollmentsCreate = () => {
       },
     });
 
-    navigate("/enrollments/confirm", {
-      state: {
-        enrollment: response?.data,
-      },
-    });
+    navigate("/enrollments/confirm", { state: { enrollment: response?.data } });
   };
 
   const isSubmitDisabled =
@@ -121,7 +113,9 @@ const EnrollmentsCreate = () => {
                         Class <span className="text-orange-600">*</span>
                       </FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(Number(value))}
+                        onValueChange={(value) =>
+                          field.onChange(Number(value))
+                        }
                         value={field.value ? String(field.value) : ""}
                         disabled={classesLoading}
                       >
@@ -131,7 +125,7 @@ const EnrollmentsCreate = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {classes.map((classItem) => (
+                          {classes.map((classItem: ClassDetails) => (
                             <SelectItem
                               key={classItem.id}
                               value={String(classItem.id)}
