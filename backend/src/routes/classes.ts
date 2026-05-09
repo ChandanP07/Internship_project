@@ -59,7 +59,7 @@ router.get("/", requireAuth(), async (req: any, res) => {
       filterConditions.length > 0 ? and(...filterConditions) : undefined;
 
     const countResult = await db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: sql<number>`count(distinct ${classes.id})` })
       .from(classes)
       .leftJoin(subjects, eq(classes.subjectId, subjects.id))
       .leftJoin(user, eq(classes.teacherId, user.id))
@@ -69,7 +69,7 @@ router.get("/", requireAuth(), async (req: any, res) => {
     const totalCount = countResult[0]?.count ?? 0;
 
     const classesList = await db
-      .select({
+      .selectDistinct({
         ...getTableColumns(classes),
         subject: {
           ...getTableColumns(subjects),

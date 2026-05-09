@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { useList } from "@refinedev/core";
+import { EditButton } from "@/components/classora-ui/buttons/edit";
+import { useGetIdentity } from "@refinedev/core";
 
 import {
   Select,
@@ -18,6 +20,7 @@ import { CreateButton } from "@/components/classora-ui/buttons/create";
 import { Breadcrumb } from "@/components/classora-ui/layout/breadcrumb";
 import { DataTable } from "@/components/classora-ui/data-table/data-table";
 import { ShowButton } from "@/components/classora-ui/buttons/show";
+
 
 import { Subject, User } from "@/types";
 
@@ -40,6 +43,10 @@ const ClassesList = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("all");
 
+  const { data: currentUser } = useGetIdentity<User>();
+  const isTeacherOrAdmin =
+    currentUser?.role === "teacher" ||
+    currentUser?.role === "admin";
   const classColumns = useMemo<ColumnDef<ClassListItem>[]>(
     () => [
       {
@@ -128,17 +135,30 @@ const ClassesList = () => {
       },
       {
         id: "details",
-        size: 140,
-        header: () => <p className="column-title">Details</p>,
+        size: 220,
+        header: () => <p className="column-title">Actions</p>,
         cell: ({ row }) => (
-          <ShowButton
-            resource="classes"
-            recordItemId={row.original.id}
-            variant="outline"
-            size="sm"
-          >
-            View
-          </ShowButton>
+          <div className="flex gap-2">
+            <ShowButton
+              resource="classes"
+              recordItemId={row.original.id}
+              variant="outline"
+              size="sm"
+            >
+              View
+            </ShowButton>
+
+            {isTeacherOrAdmin && (
+              <EditButton
+                resource="classes"
+                recordItemId={row.original.id}
+                variant="outline"
+                size="sm"
+              >
+                Edit
+              </EditButton>
+            )}
+          </div>
         ),
       },
     ],
@@ -173,32 +193,32 @@ const ClassesList = () => {
     selectedSubject === "all"
       ? []
       : [
-          {
-            field: "subject",
-            operator: "eq" as const,
-            value: selectedSubject,
-          },
-        ];
+        {
+          field: "subject",
+          operator: "eq" as const,
+          value: selectedSubject,
+        },
+      ];
 
   const teacherFilters =
     selectedTeacher === "all"
       ? []
       : [
-          {
-            field: "teacher",
-            operator: "eq" as const,
-            value: selectedTeacher,
-          },
-        ];
+        {
+          field: "teacher",
+          operator: "eq" as const,
+          value: selectedTeacher,
+        },
+      ];
 
   const searchFilters = searchQuery
     ? [
-        {
-          field: "name",
-          operator: "contains" as const,
-          value: searchQuery,
-        },
-      ]
+      {
+        field: "name",
+        operator: "contains" as const,
+        value: searchQuery,
+      },
+    ]
     : [];
 
   const classesTable = useTable<ClassListItem>({

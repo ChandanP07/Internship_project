@@ -85,7 +85,7 @@ router.get("/:id", requireAuth(), async (req: any, res) => {
     const userId = req.params.id;
     const authUser = req.user;
 
-    if (authUser.role !== "admin" && authUser.id !== userId) {
+    if (authUser.role !== "admin" && authUser.role !== "teacher" && authUser.id !== userId) {
       return res.status(403).json({ error: "Forbidden" });
     }
 

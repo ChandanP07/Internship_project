@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useBack, useList, useOne } from "@refinedev/core";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   Form,
   FormControl,
@@ -12,6 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+
 import {
   Select,
   SelectContent,
@@ -20,33 +26,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { CreateView } from "@/components/classora-ui/views/create-view";
 import { Breadcrumb } from "@/components/classora-ui/layout/breadcrumb";
+import { EditView } from "@/components/classora-ui/views/edit-view";
 
-import { Textarea } from "@/components/ui/textarea";
-import { useBack, useList } from "@refinedev/core";
-import { Loader2 } from "lucide-react";
-import { classSchema } from "@/lib/schema";
 import UploadWidget from "@/components/upload-widget";
+
+import { Loader2 } from "lucide-react";
+
+import { classSchema } from "@/lib/schema";
+
 import { Subject, User } from "@/types";
+
 import z from "zod";
 
-const ClassesCreate = () => {
+type ClassesEditProps = {
+  id?: string;
+};
+
+const ClassesEdit = ({ id }: ClassesEditProps) => {
   const back = useBack();
 
   const form = useForm({
     resolver: zodResolver(classSchema),
     refineCoreProps: {
       resource: "classes",
-      action: "create",
+      action: "edit",
+      id,
+      meta: {
+        method: "put",
+      },
     },
     defaultValues: {
-      status: "active",
       name: "",
       description: "",
       bannerUrl: "",
       bannerCldPubId: "",
       teacherId: "",
+      status: "active",
     },
   });
 
@@ -55,19 +71,21 @@ const ClassesCreate = () => {
     handleSubmit,
     formState: { isSubmitting, errors },
     control,
+    reset,
   } = form;
 
   const bannerPublicId = form.watch("bannerCldPubId");
 
-  const onSubmit = async (values: z.infer<typeof classSchema>) => {
-    try {
-      await onFinish(values);
-    } catch (error) {
-      console.error("Error creating class:", error);
-    }
-  };
+  // Fetch class data
+  const { data: classData, isLoading: classLoading } = useOne({
+    resource: "classes",
+    id: id!,
+    queryOptions: {
+      enabled: !!id,
+    },
+  });
 
-  // Fetch subjects list
+  // Fetch subjects
   const { query: subjectsQuery } = useList<Subject>({
     resource: "subjects",
     pagination: {
@@ -75,7 +93,7 @@ const ClassesCreate = () => {
     },
   });
 
-  // Fetch teachers list
+  // Fetch teachers
   const { query: teachersQuery } = useList<User>({
     resource: "users",
     filters: [
@@ -90,20 +108,58 @@ const ClassesCreate = () => {
     },
   });
 
+  const subjects = subjectsQuery.data?.data || [];
   const teachers = teachersQuery.data?.data || [];
+
+  const subjectsLoading = subjectsQuery.isLoading;
   const teachersLoading = teachersQuery.isLoading;
 
-  const subjects = subjectsQuery.data?.data || [];
-  const subjectsLoading = subjectsQuery.isLoading;
+  // Populate form
+  useEffect(() => {
+    if (classData?.data) {
+      const cls = classData.data;
+
+      reset({
+        name: cls.name ?? "",
+        description: cls.description ?? "",
+        bannerUrl: cls.bannerUrl ?? "",
+        bannerCldPubId: cls.bannerCldPubId ?? "",
+        teacherId: cls.teacherId ?? "",
+        subjectId: cls.subjectId,
+        capacity: cls.capacity,
+        status: cls.status ?? "active",
+      });
+    }
+  }, [classData, reset]);
+
+  const onSubmit = async (values: z.infer<typeof classSchema>) => {
+    try {
+      await onFinish(values);
+    } catch (error) {
+      console.error("Error updating class:", error);
+    }
+  };
+
+  if (classLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
+  }
 
   return (
-    <CreateView className="class-view">
+    <EditView className="class-view">
       <Breadcrumb />
 
-      <h1 className="page-title">Create a Class</h1>
+      <h1 className="page-title">Edit Class</h1>
+
       <div className="intro-row">
-        <p>Provide the required information below to add a class.</p>
-        <Button onClick={() => back()}>Go Back</Button>
+        <p>Update the class information below.</p>
+
+        <Button onClick={() => back()}>
+          Go Back
+        </Button>
       </div>
 
       <Separator />
@@ -112,7 +168,7 @@ const ClassesCreate = () => {
         <Card className="class-form-card">
           <CardHeader className="relative z-10">
             <CardTitle className="text-2xl pb-0 font-bold text-gradient-orange">
-              Fill out form
+              Update class
             </CardTitle>
           </CardHeader>
 
@@ -120,23 +176,29 @@ const ClassesCreate = () => {
 
           <CardContent className="mt-7">
             <Form {...form}>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
+                {/* Banner */}
                 <FormField
                   control={control}
                   name="bannerUrl"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Banner Image <span className="text-orange-600">*</span>
+                        Banner Image{" "}
+                        <span className="text-orange-600">*</span>
                       </FormLabel>
+
                       <FormControl>
                         <UploadWidget
                           value={
                             field.value
                               ? {
-                                  url: field.value,
-                                  publicId: bannerPublicId ?? "",
-                                }
+                                url: field.value,
+                                publicId: bannerPublicId ?? "",
+                              }
                               : null
                           }
                           onChange={(file) => {
@@ -174,13 +236,15 @@ const ClassesCreate = () => {
                   )}
                 />
 
+                {/* Name */}
                 <FormField
                   control={control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Class Name <span className="text-orange-600">*</span>
+                        Class Name{" "}
+                        <span className="text-orange-600">*</span>
                       </FormLabel>
 
                       <FormControl>
@@ -196,6 +260,7 @@ const ClassesCreate = () => {
                   )}
                 />
 
+                {/* Subject + Teacher */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormField
                     control={control}
@@ -203,7 +268,8 @@ const ClassesCreate = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Subject <span className="text-orange-600">*</span>
+                          Subject{" "}
+                          <span className="text-orange-600">*</span>
                         </FormLabel>
 
                         <Select
@@ -242,7 +308,8 @@ const ClassesCreate = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Teacher <span className="text-orange-600">*</span>
+                          Teacher{" "}
+                          <span className="text-orange-600">*</span>
                         </FormLabel>
 
                         <Select
@@ -258,7 +325,10 @@ const ClassesCreate = () => {
 
                           <SelectContent>
                             {teachers.map((teacher) => (
-                              <SelectItem key={teacher.id} value={teacher.id}>
+                              <SelectItem
+                                key={teacher.id}
+                                value={teacher.id}
+                              >
                                 {teacher.name}
                               </SelectItem>
                             ))}
@@ -271,6 +341,7 @@ const ClassesCreate = () => {
                   />
                 </div>
 
+                {/* Capacity + Status */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <FormField
                     control={control}
@@ -278,7 +349,8 @@ const ClassesCreate = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Capacity <span className="text-orange-600">*</span>
+                          Capacity{" "}
+                          <span className="text-orange-600">*</span>
                         </FormLabel>
 
                         <FormControl>
@@ -313,7 +385,8 @@ const ClassesCreate = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>
-                          Status <span className="text-orange-600">*</span>
+                          Status{" "}
+                          <span className="text-orange-600">*</span>
                         </FormLabel>
 
                         <Select
@@ -327,8 +400,13 @@ const ClassesCreate = () => {
                           </FormControl>
 
                           <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
+                            <SelectItem value="active">
+                              Active
+                            </SelectItem>
+
+                            <SelectItem value="inactive">
+                              Inactive
+                            </SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -338,13 +416,15 @@ const ClassesCreate = () => {
                   />
                 </div>
 
+                {/* Description */}
                 <FormField
                   control={control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
-                        Description <span className="text-orange-600">*</span>
+                        Description{" "}
+                        <span className="text-orange-600">*</span>
                       </FormLabel>
 
                       <FormControl>
@@ -362,15 +442,19 @@ const ClassesCreate = () => {
 
                 <Separator />
 
-                <Button type="submit" size="lg" className="w-full">
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full"
+                >
                   {isSubmitting ? (
                     <div className="flex gap-1">
-                      <span>Creating Class...</span>
+                      <span>Updating Class...</span>
 
                       <Loader2 className="inline-block ml-2 animate-spin" />
                     </div>
                   ) : (
-                    "Create Class"
+                    "Update Class"
                   )}
                 </Button>
               </form>
@@ -378,8 +462,8 @@ const ClassesCreate = () => {
           </CardContent>
         </Card>
       </div>
-    </CreateView>
+    </EditView>
   );
 };
 
-export default ClassesCreate;
+export default ClassesEdit;

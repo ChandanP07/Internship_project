@@ -36,6 +36,7 @@ import SubjectsShow from "./pages/subjects/show";
 import ClassesList from "./pages/classes/list";
 import ClassesCreate from "./pages/classes/create";
 import ClassesShow from "./pages/classes/show";
+import ClassesEdit from "./pages/classes/edit";
 import DepartmentsList from "./pages/departments/list";
 import DepartmentsCreate from "./pages/departments/create";
 import DepartmentShow from "./pages/departments/show";
@@ -90,6 +91,7 @@ function App() {
                   name: "classes",
                   list: "/classes",
                   create: "/classes/create",
+                  edit: "/classes/edit/:id",
                   show: "/classes/show/:id",
                   meta: { label: "Classes", icon: <GraduationCap /> },
                 },
@@ -98,20 +100,20 @@ function App() {
                   list: "/enrollments",
                   meta: { label: "Enrollments", icon: <ClipboardCheck /> },
                 },
-                 {
-                   name: "assignments",
-                   list: "/assignments",
-                   create: "/assignments/create",
-                   show: "/assignments/show/:id",
-                   meta: { label: "Assignments", icon: <ClipboardList /> },
-                 },
-                 {
-                   name: "submissions",
-                   list: "/submissions",
-                   create: "/submissions/create",
-                   show: "/submissions/show/:id",
-                   meta: { label: "Submissions", icon: <FileText /> },
-                 },
+                {
+                  name: "assignments",
+                  list: "/assignments",
+                  create: "/assignments/create",
+                  show: "/assignments/show/:id",
+                  meta: { label: "Assignments", icon: <ClipboardList /> },
+                },
+                {
+                  name: "submissions",
+                  list: "/submissions",
+                  create: "/submissions/create",
+                  show: "/submissions/show/:id",
+                  meta: { label: "Submissions", icon: <FileText /> },
+                },
                 {
                   name: "subjects",
                   list: "/subjects",
@@ -174,6 +176,19 @@ function App() {
                       }
                     />
                     <Route path="show/:id" element={<ClassesShow />} />
+
+                    <Route
+                      path="edit/:id"
+                      element={
+                        <CanAccess
+                          resource="classes"
+                          action="edit"
+                          fallback={<AccessDenied />}
+                        >
+                          <ClassesEdit />
+                        </CanAccess>
+                      }
+                    />
                   </Route>
 
                   {/* Enrollments */}
@@ -183,42 +198,42 @@ function App() {
                     <Route path="join" element={<EnrollmentsJoin />} />
                   </Route>
 
-                   {/* Assignments */}
-                   <Route path="assignments">
-                     <Route index element={<AssignmentsList />} />
-                     <Route
-                       path="create"
-                       element={
-                         <CanAccess
-                           resource="assignments"
-                           action="create"
-                           fallback={<AccessDenied />}
-                         >
-                           <AssignmentsCreate />
-                         </CanAccess>
-                       }
-                     />
-                     <Route path="show/:id" element={<AssignmentsShow />} />
-                   </Route>
+                  {/* Assignments */}
+                  <Route path="assignments">
+                    <Route index element={<AssignmentsList />} />
+                    <Route
+                      path="create"
+                      element={
+                        <CanAccess
+                          resource="assignments"
+                          action="create"
+                          fallback={<AccessDenied />}
+                        >
+                          <AssignmentsCreate />
+                        </CanAccess>
+                      }
+                    />
+                    <Route path="show/:id" element={<AssignmentsShow />} />
+                  </Route>
 
-                   {/* Submissions */}
-                   <Route path="submissions">
-                     <Route index element={<SubmissionsList />} />
-                     <Route
-                       path="create"
-                       element={
-                         <CanAccess
-                           resource="submissions"
-                           action="create"
-                           fallback={<AccessDenied />}
-                         >
-                           <SubmissionsCreate />
-                         </CanAccess>
-                       }
-                     />
-                   </Route>
+                  {/* Submissions */}
+                  <Route path="submissions">
+                    <Route index element={<SubmissionsList />} />
+                    <Route
+                      path="create"
+                      element={
+                        <CanAccess
+                          resource="submissions"
+                          action="create"
+                          fallback={<AccessDenied />}
+                        >
+                          <SubmissionsCreate />
+                        </CanAccess>
+                      }
+                    />
+                  </Route>
 
-                   {/* Subjects */}
+                  {/* Subjects */}
                   <Route path="subjects">
                     <Route index element={<SubjectsList />} />
                     <Route

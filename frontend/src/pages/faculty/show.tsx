@@ -168,7 +168,6 @@ const FacultyShow = () => {
   const departmentsTable = useTable<FacultyDepartment>({
     columns: departmentColumns,
     refineCoreProps: {
-      resource: `users/${userId}/departments`,
       pagination: {
         pageSize: 10,
         mode: "server",
@@ -179,7 +178,6 @@ const FacultyShow = () => {
   const subjectsTable = useTable<FacultySubject>({
     columns: subjectColumns,
     refineCoreProps: {
-      resource: `users/${userId}/subjects`,
       pagination: {
         pageSize: 10,
         mode: "server",

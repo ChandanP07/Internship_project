@@ -165,7 +165,7 @@ export function DataTable<TData extends BaseRecord>({
               getRowModel().rows.map((row) => {
                 return (
                   <TableRow
-                    key={row.original?.id ?? row.id}
+                    key={`${row.original?.id ?? row.id}-${row.index}`}
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => {
@@ -282,8 +282,8 @@ export function getCommonStyles<TData>({
       isOverflowing.horizontal && isLastLeftPinnedColumn
         ? "-4px 0 4px -4px var(--border) inset"
         : isOverflowing.horizontal && isFirstRightPinnedColumn
-        ? "4px 0 4px -4px var(--border) inset"
-        : undefined,
+          ? "4px 0 4px -4px var(--border) inset"
+          : undefined,
     left:
       isOverflowing.horizontal && isPinned === "left"
         ? `${column.getStart("left")}px`
