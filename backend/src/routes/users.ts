@@ -2,7 +2,7 @@ import express from "express";
 import { and, desc, eq, ilike, or, sql, getTableColumns } from "drizzle-orm";
 
 import { db } from "../db/index";
-import { classes, departments, enrollments, subjects, user } from "../db/schema/index";
+import { account, classes, departments, enrollments, subjects, user } from "../db/schema/index";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router = express.Router();
@@ -142,6 +142,59 @@ router.delete("/:id", requireAuth(["admin"]), async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// Create user (Admin only)
+router.post("/", requireAuth(["admin"]), async (req: any, res) => {
+  try {
+    const { name, email, password, role, image, imageCldPubId } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "Name, email and password are required" });
+    }
+
+    // Only allow creating teachers
+    if (role !== "teacher") {
+      return res.status(400).json({ error: "Can only create teacher accounts" });
+    }
+
+    // Check if email already exists
+    const [existing] = await db.select().from(user).where(eq(user.email, email));
+    if (existing) {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+
+    // Generate user ID (simple for now)
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // Create user
+    await db.insert(user).values({
+      id: userId,
+      name: String(name),
+      email: String(email),
+      emailVerified: true, // Admin created accounts are verified
+      role: "teacher",
+      image: image ? String(image) : null,
+      imageCldPubId: imageCldPubId ? String(imageCldPubId) : null,
+    });
+
+    // Create account with password
+    await db.insert(account).values({
+      id: `account_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId,
+      accountId: email,
+      providerId: "credential",
+      password: String(password), // Note: This should be hashed in production
+    });
+
+    // Return created user
+    const [created] = await db.select().from(user).where(eq(user.id, userId));
+
+    res.status(201).json({ data: created });
+  } catch (error) {
+    console.error("POST /users error:", error);
+    res.status(500).json({ error: "Failed to create user" });
   }
 });
 

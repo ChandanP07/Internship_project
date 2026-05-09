@@ -29,6 +29,13 @@
       "when": 1778181141418,
       "tag": "0003_supreme_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778356283970,
+      "tag": "0004_mute_sumo",
+      "breakpoints": true
     }
   ]
 }

@@ -33,6 +33,7 @@ import React from "react";
 import type { User } from "@/types";
 
 const STUDENT_HIDDEN_RESOURCES = ["departments", "subjects", "users"];
+const ADMIN_HIDDEN_RESOURCES = ["assignments", "submissions", "announcements", "lectures", "enrollments"];
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
@@ -42,6 +43,9 @@ export function Sidebar() {
 
   const visibleItems = menuItems.filter((item: TreeMenuItem) => {
     if (role === "student" && STUDENT_HIDDEN_RESOURCES.includes(item.name)) {
+      return false;
+    }
+    if (role === "admin" && ADMIN_HIDDEN_RESOURCES.includes(item.name)) {
       return false;
     }
     return true;

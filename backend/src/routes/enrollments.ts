@@ -177,8 +177,8 @@ const handleEnrollmentAction = async (req: any, res: any) => {
   }
 };
 
-router.patch("/:id", requireAuth(["teacher", "admin"]), handleEnrollmentAction);
-router.put("/:id", requireAuth(["teacher", "admin"]), handleEnrollmentAction);
+router.patch("/:id", requireAuth(["teacher"]), handleEnrollmentAction);
+router.put("/:id", requireAuth(["teacher"]), handleEnrollmentAction);
 
 // Delete enrollment (leave class or remove student)
 router.delete("/:id", requireAuth(), async (req: any, res) => {

@@ -68,6 +68,18 @@ const ClassesShow = () => {
   });
   const submissions = submissionsResult.data ?? [];
 
+  const { result: lecturesResult } = useList<any>({
+    resource: "lectures",
+    filters: [
+      { field: "classId", operator: "eq", value: Number(classId) },
+    ],
+    pagination: { pageSize: 50 },
+    queryOptions: {
+      enabled: Number.isFinite(Number(classId)),
+    },
+  });
+  const lectures = lecturesResult.data ?? [];
+
   const studentColumns = useMemo<ColumnDef<ClassUser>[]>(
     () => [
       {
@@ -256,85 +268,39 @@ const ClassesShow = () => {
             </Card>
           )}
 
+          {/* Lectures */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>Assignments</CardTitle>
-                <CardDescription>Latest assignments for this class</CardDescription>
+                <CardTitle>Recorded Lectures</CardTitle>
+                <CardDescription>Watch recorded lectures for this class</CardDescription>
               </div>
-              {(isAdmin || isTeacher) && (
-                <Button size="sm" onClick={() => navigate("/assignments/create")}>
-                  Create
+              {isTeacher && (
+                <Button size="sm" onClick={() => navigate("/lectures/create")}>
+                  Upload
                 </Button>
               )}
             </CardHeader>
             <CardContent className="space-y-3">
-              {assignments.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No assignments yet.</p>
+              {lectures.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No lectures uploaded yet.</p>
               ) : (
-                assignments.map((assignment: any) => (
-                  <div key={assignment.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{assignment.title}</p>
+                lectures.map((lecture: any) => (
+                  <div key={lecture.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{lecture.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        Due {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : "N/A"}
+                        {lecture.teacher?.name} • {new Date(lecture.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => navigate(`/assignments/show/${assignment.id}`)}>
-                      View
+                    <Button size="sm" variant="outline" onClick={() => navigate(`/lectures/show/${lecture.id}`)}>
+                      Watch
                     </Button>
                   </div>
                 ))
               )}
             </CardContent>
           </Card>
-
-          {(isAdmin || isTeacher) && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="text-primary" /> Submission Overview
-                </CardTitle>
-                <CardDescription>Submission status across all assignments</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {assignments.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No assignments to show submissions for.</p>
-                ) : (
-                  assignments.map((assignment: any) => {
-                    const assignmentSubmissions = submissions.filter((s: any) => s.assignmentId === assignment.id);
-                    const submitted = assignmentSubmissions.filter((s: any) => s.status === 'submitted' || s.status === 'late').length;
-                    const graded = assignmentSubmissions.filter((s: any) => s.status === 'graded').length;
-                    const total = assignmentSubmissions.length; // This assumes we have all enrolled students, but we might not
-
-                    return (
-                      <div key={assignment.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{assignment.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Due {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : "N/A"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="text-center">
-                            <p className="font-medium">{submitted}</p>
-                            <p className="text-xs text-muted-foreground">Submitted</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-medium">{graded}</p>
-                            <p className="text-xs text-muted-foreground">Graded</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/assignments/show/${assignment.id}`)}>
-                          View Details
-                        </Button>
-                      </div>
-                    );
-                  })
-                )}
-              </CardContent>
-            </Card>
-          )}
 
           {isStudent && (
             <Card>

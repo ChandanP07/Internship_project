@@ -3,21 +3,30 @@ import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { useSearchParams } from "react-router";
+import { useGetIdentity } from "@refinedev/core";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { ListView } from "@/components/classora-ui/views/list-view";
 import { Breadcrumb } from "@/components/classora-ui/layout/breadcrumb";
 import { DataTable } from "@/components/classora-ui/data-table/data-table";
 import { ShowButton } from "@/components/classora-ui/buttons/show";
+import { CreateButton } from "@/components/classora-ui/buttons/create";
+
 import type { User } from "@/types";
 
 const FacultyList = () => {
   const [searchParams] = useSearchParams();
+
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") ?? ""
   );
+
+  const { data: currentUser } = useGetIdentity<any>();
+
+  const isAdmin = currentUser?.role === "admin";
 
   const facultyColumns = useMemo<ColumnDef<User>[]>(
     () => [
@@ -29,33 +38,45 @@ const FacultyList = () => {
         cell: ({ row, getValue }) => {
           const name = getValue<string>();
           const image = row.original.image;
+
           return (
             <div className="flex items-center gap-3">
               <Avatar>
                 {image && <AvatarImage src={image} alt={name} />}
-                <AvatarFallback>{getInitials(name)}</AvatarFallback>
+
+                <AvatarFallback>
+                  {getInitials(name)}
+                </AvatarFallback>
               </Avatar>
+
               <span className="text-foreground">{name}</span>
             </div>
           );
         },
       },
+
       {
         id: "email",
         accessorKey: "email",
         size: 240,
         header: () => <p className="column-title">Email</p>,
         cell: ({ getValue }) => (
-          <span className="text-foreground">{getValue<string>()}</span>
+          <span className="text-foreground">
+            {getValue<string>()}
+          </span>
         ),
       },
+
       {
         id: "role",
         accessorKey: "role",
         size: 120,
         header: () => <p className="column-title">Role</p>,
-        cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
+        cell: ({ getValue }) => (
+          <Badge>{getValue<string>()}</Badge>
+        ),
       },
+
       {
         id: "details",
         size: 140,
@@ -87,12 +108,15 @@ const FacultyList = () => {
 
   const facultyTable = useTable<User>({
     columns: facultyColumns,
+
     refineCoreProps: {
       resource: "users",
+
       pagination: {
         pageSize: 10,
         mode: "server",
       },
+
       filters: {
         permanent: [
           {
@@ -100,9 +124,11 @@ const FacultyList = () => {
             operator: "eq" as const,
             value: "teacher",
           },
+
           ...searchFilters,
         ],
       },
+
       sorters: {
         initial: [
           {
@@ -117,22 +143,36 @@ const FacultyList = () => {
   return (
     <ListView>
       <Breadcrumb />
-      <h1 className="page-title">Faculty</h1>
 
-      <div className="intro-row">
-        <p>Browse and manage faculty members.</p>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="page-title">Faculty</h1>
 
-        <div className="actions-row">
+          <p className="text-muted-foreground">
+            Browse and manage faculty members.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
           <div className="search-field">
             <Search className="search-icon" />
+
             <Input
               type="text"
               placeholder="Search by name or email..."
               className="pl-10 w-full"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) =>
+                setSearchQuery(event.target.value)
+              }
             />
           </div>
+
+          {isAdmin && (
+            <CreateButton resource="users">
+              + Create Faculty
+            </CreateButton>
+          )}
         </div>
       </div>
 
@@ -143,9 +183,16 @@ const FacultyList = () => {
 
 const getInitials = (name = "") => {
   const parts = name.trim().split(" ");
+
   if (parts.length === 0) return "";
-  if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
-  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+
+  if (parts.length === 1) {
+    return parts[0][0]?.toUpperCase() ?? "";
+  }
+
+  return `${parts[0][0] ?? ""}${
+    parts[parts.length - 1][0] ?? ""
+  }`.toUpperCase();
 };
 
 export default FacultyList;

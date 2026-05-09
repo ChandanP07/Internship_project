@@ -102,7 +102,7 @@ router.get("/", requireAuth(), async (req: any, res) => {
   }
 });
 
-router.post("/", requireAuth(["admin", "teacher"]), async (req: any, res) => {
+router.post("/", requireAuth(["teacher"]), async (req: any, res) => {
   try {
     const {
       name,
@@ -149,7 +149,7 @@ router.post("/", requireAuth(["admin", "teacher"]), async (req: any, res) => {
   }
 });
 
-router.put("/:id", requireAuth(["admin", "teacher"]), async (req: any, res) => {
+router.put("/:id", requireAuth(["teacher"]), async (req: any, res) => {
   try {
     const classId = Number(req.params.id);
     const authUser = req.user;
@@ -202,7 +202,7 @@ router.put("/:id", requireAuth(["admin", "teacher"]), async (req: any, res) => {
   }
 });
 
-router.delete("/:id", requireAuth(["admin", "teacher"]), async (req: any, res) => {
+router.delete("/:id", requireAuth(["teacher"]), async (req: any, res) => {
   try {
     const classId = Number(req.params.id);
     const authUser = req.user;

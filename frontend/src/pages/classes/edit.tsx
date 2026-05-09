@@ -77,13 +77,14 @@ const ClassesEdit = ({ id }: ClassesEditProps) => {
   const bannerPublicId = form.watch("bannerCldPubId");
 
   // Fetch class data
-  const { data: classData, isLoading: classLoading } = useOne({
+  const { result: classData, query } = useOne({
     resource: "classes",
     id: id!,
     queryOptions: {
       enabled: !!id,
     },
   });
+  const classLoading = query.isLoading;
 
   // Fetch subjects
   const { query: subjectsQuery } = useList<Subject>({

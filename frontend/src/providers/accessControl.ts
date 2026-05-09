@@ -16,8 +16,15 @@ export const accessControlProvider: AccessControlProvider = {
 
     if (!role) return { can: false };
 
-    // Admin has full access
-    if (role === "admin") return { can: true };
+    // Admin has restricted access - no classroom management
+    if (role === "admin") {
+      // Admin can only manage system resources
+      const allowedResources = ["users", "departments", "subjects", "classes"];
+      if (!resource || !allowedResources.includes(resource)) return { can: false };
+      // For classes, admin can only list/show
+      if (resource === "classes" && action && !["list", "show"].includes(action)) return { can: false };
+      return { can: true };
+    }
 
     // --- Users (Faculty) ---
     if (resource === "users") {
@@ -61,6 +68,15 @@ export const accessControlProvider: AccessControlProvider = {
 
     // --- Announcements ---
     if (resource === "announcements") {
+      if (action === "list" || action === "show") return { can: true };
+      if (action === "create" || action === "edit" || action === "delete") {
+        return { can: role === "teacher" };
+      }
+      return { can: false };
+    }
+
+    // --- Lectures ---
+    if (resource === "lectures") {
       if (action === "list" || action === "show") return { can: true };
       if (action === "create" || action === "edit" || action === "delete") {
         return { can: role === "teacher" };

@@ -382,7 +382,7 @@ router.post("/", requireAuth(["student"]), async (req: any, res) => {
 // Update submission
 router.patch(
   "/:id",
-  requireAuth(["teacher", "admin"]),
+  requireAuth(["teacher"]),
   async (req: any, res) => {
     try {
       const submissionId = Number(req.params.id);

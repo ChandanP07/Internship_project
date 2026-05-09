@@ -11,88 +11,87 @@ import {
 } from "@/components/ui/card";
 import type { User } from "@/types";
 
-type AssignmentItem = {
+type LectureItem = {
   id: number;
   classId: number;
   title: string;
   description: string;
-  dueDate: string;
-  totalMarks: number;
-  status: "draft" | "published" | "closed" | string;
+  videoUrl: string;
+  thumbnailUrl?: string;
+  notesUrl?: string;
   class?: { id: number; name: string };
   teacher?: { id: string; name: string };
+  createdAt: string;
 };
 
-const AssignmentsList = () => {
+const LecturesList = () => {
   const { data: currentUser } = useGetIdentity<User>();
-  const { query } = useList<AssignmentItem>({
-    resource: "assignments",
+  const { query } = useList<LectureItem>({
+    resource: "lectures",
     pagination: { pageSize: 50 },
   });
 
-  const assignments = query.data?.data ?? [];
+  const lectures = query.data?.data ?? [];
   const canCreate = currentUser?.role === "teacher";
 
   if (query.isLoading)
-    return <p className="text-sm text-muted-foreground">Loading assignments...</p>;
+    return <p className="text-sm text-muted-foreground">Loading lectures...</p>;
   if (query.isError)
-    return <p className="text-sm text-red-500">Failed to load assignments.</p>;
+    return <p className="text-sm text-red-500">Failed to load lectures.</p>;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Assignments</h1>
+          <h1 className="text-2xl font-semibold">Lectures</h1>
           <p className="text-sm text-muted-foreground">
             {currentUser?.role === "student"
-              ? "Published assignments from your enrolled classes."
-              : "Manage class assignments, deadlines and marks."}
+              ? "Recorded lectures from your enrolled classes."
+              : "Manage recorded lectures for your classes."}
           </p>
         </div>
         {canCreate && (
           <Button asChild>
-            <Link to="/assignments/create">Create Assignment</Link>
+            <Link to="/lectures/create">Create Lecture</Link>
           </Button>
         )}
       </div>
 
-      {assignments.length === 0 ? (
+      {lectures.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-sm text-muted-foreground">
-            No assignments found.
+            No lectures found.
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4">
-          {assignments.map((item: AssignmentItem) => (
+          {lectures.map((item: LectureItem) => (
             <Card key={item.id}>
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
+                  <div className="flex-1">
+                    <CardTitle className="text-base">
+                      {item.title}
+                    </CardTitle>
                     <CardDescription>
-                      {item.class?.name ?? `Class #${item.classId}`} • Due{" "}
-                      {new Date(item.dueDate).toLocaleString()}
+                      {item.class?.name ?? `Class #${item.classId}`} • {item.teacher?.name}
                     </CardDescription>
                   </div>
-                  <Badge variant="secondary" className="capitalize">
-                    {item.status}
+                  <Badge variant="outline" className="capitalize">
+                    Lecture
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2">
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {item.description}
                 </p>
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
-                    Total Marks:{" "}
-                    <span className="font-medium text-foreground">
-                      {item.totalMarks}
-                    </span>
+                    Created {new Date(item.createdAt).toLocaleDateString()}
                   </p>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to={`/assignments/show/${item.id}`}>View</Link>
+                    <Link to={`/lectures/show/${item.id}`}>Watch</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -104,4 +103,4 @@ const AssignmentsList = () => {
   );
 };
 
-export default AssignmentsList;
+export default LecturesList;

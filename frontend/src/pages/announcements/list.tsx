@@ -28,8 +28,7 @@ const AnnouncementsList = () => {
   });
 
   const announcements = query.data?.data ?? [];
-  const canCreate =
-    currentUser?.role === "admin" || currentUser?.role === "teacher";
+  const canCreate = currentUser?.role === "teacher";
 
   if (query.isLoading)
     return (

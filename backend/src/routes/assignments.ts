@@ -195,7 +195,7 @@ router.get("/:id", requireAuth(), async (req: any, res) => {
   }
 });
 
-router.post("/", requireAuth(["teacher", "admin"]), async (req: any, res) => {
+router.post("/", requireAuth(["teacher"]), async (req: any, res) => {
   try {
     const authUser = req.user;
     const {
@@ -344,7 +344,7 @@ router.patch("/:id/status", requireAuth(["teacher", "admin"]), async (req: any, 
   }
 });
 
-router.delete("/:id", requireAuth(["teacher", "admin"]), async (req: any, res) => {
+router.delete("/:id", requireAuth(["teacher"]), async (req: any, res) => {
   try {
     const assignmentId = Number(req.params.id);
     if (!Number.isFinite(assignmentId)) {

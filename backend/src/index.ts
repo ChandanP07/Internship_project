@@ -14,6 +14,7 @@ import departmentsRouter from "./routes/departments";
 import statsRouter from "./routes/stats";
 import announcementsRoutes from "./routes/announcements";
 import assignmentsRoutes from "./routes/assignments";
+import lecturesRoutes from "./routes/lectures";
 import submissionsRoutes from "./routes/submissions";
 import enrollmentsRouter from "./routes/enrollments";
 
@@ -25,7 +26,7 @@ const PORT = 8000;
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: ["http://localhost:4173", process.env.FRONTEND_URL],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -45,6 +46,7 @@ app.use("/api/stats", requireAuth(), statsRouter);
 app.use("/api/enrollments", requireAuth(), enrollmentsRouter);
 app.use("/api/announcements", requireAuth(), announcementsRoutes);
 app.use("/api/assignments", requireAuth(), assignmentsRoutes);
+app.use("/api/lectures", requireAuth(), lecturesRoutes);
 app.use("/api/submissions", requireAuth(), submissionsRoutes);
 
 // Users route — admin-only for viewing all, or authenticated to view own profile

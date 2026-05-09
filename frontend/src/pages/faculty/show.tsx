@@ -1,4 +1,4 @@
-import { useShow } from "@refinedev/core";
+import { useShow, useList } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
@@ -42,7 +42,23 @@ const FacultyShow = () => {
     resource: "users",
   });
 
+  const { result: classesResult } = useList<any>({
+    resource: "classes",
+    filters: [{ field: "teacherId", operator: "eq", value: userId }],
+    pagination: { pageSize: 50 },
+    queryOptions: { enabled: !!userId },
+  });
+
+  const { result: assignmentsResult } = useList<any>({
+    resource: "assignments",
+    filters: [{ field: "teacherId", operator: "eq", value: userId }],
+    pagination: { pageSize: 100 },
+    queryOptions: { enabled: !!userId },
+  });
+
   const user = query.data?.data;
+  const classes = classesResult.data ?? [];
+  const assignments = assignmentsResult.data ?? [];
 
   const departmentColumns = useMemo<ColumnDef<FacultyDepartment>[]>(
     () => [
@@ -226,25 +242,46 @@ const FacultyShow = () => {
       <div className="space-y-6">
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Departments</CardTitle>
+            <CardTitle>Classes Taught</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Departments tied to {user.name} based on classes and enrollments.
-            </p>
-            <DataTable table={departmentsTable} paginationVariant="simple" />
+            <div className="grid gap-4">
+              {classes.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No classes assigned yet.</p>
+              ) : (
+                classes.map((cls: any) => (
+                  <div key={cls.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{cls.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {cls.subject?.name} • {cls.capacity} students
+                      </p>
+                    </div>
+                    <Badge variant={cls.status === "active" ? "default" : "secondary"}>
+                      {cls.status}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
 
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Subjects</CardTitle>
+            <CardTitle>Teaching Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Subjects associated with {user.name} in this term.
-            </p>
-            <DataTable table={subjectsTable} paginationVariant="simple" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 border rounded-lg">
+                <p className="text-2xl font-bold text-primary">{classes.length}</p>
+                <p className="text-sm text-muted-foreground">Classes</p>
+              </div>
+              <div className="text-center p-4 border rounded-lg">
+                <p className="text-2xl font-bold text-primary">{assignments.length}</p>
+                <p className="text-sm text-muted-foreground">Assignments</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

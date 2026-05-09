@@ -21,6 +21,7 @@ import {
   GraduationCap,
   Home,
   Users,
+  Video,
 } from "lucide-react";
 import { Layout } from "./components/classora-ui/layout/layout";
 import { dataProvider } from "./providers/data";
@@ -40,6 +41,7 @@ import ClassesEdit from "./pages/classes/edit";
 import DepartmentsList from "./pages/departments/list";
 import DepartmentsCreate from "./pages/departments/create";
 import DepartmentShow from "./pages/departments/show";
+import FacultyCreate from "./pages/faculty/create";
 import FacultyList from "./pages/faculty/list";
 import FacultyShow from "./pages/faculty/show";
 import EnrollmentRequests from "./pages/enrollments/requests";
@@ -49,6 +51,10 @@ import AssignmentsCreate from "./pages/assignments/create";
 import AssignmentsShow from "./pages/assignments/show";
 import SubmissionsList from "./pages/submissions/list";
 import SubmissionsCreate from "./pages/submissions/create";
+import LecturesList from "./pages/lectures/list";
+import LecturesCreate from "./pages/lectures/create";
+import LecturesEdit from "./pages/lectures/edit";
+import LecturesShow from "./pages/lectures/show";
 import Profile from "./pages/profile";
 import { User } from "./types";
 
@@ -108,12 +114,20 @@ function App() {
                   meta: { label: "Assignments", icon: <ClipboardList /> },
                 },
                 {
-                  name: "submissions",
-                  list: "/submissions",
-                  create: "/submissions/create",
-                  show: "/submissions/show/:id",
-                  meta: { label: "Submissions", icon: <FileText /> },
-                },
+                   name: "submissions",
+                   list: "/submissions",
+                   create: "/submissions/create",
+                   show: "/submissions/show/:id",
+                   meta: { label: "Submissions", icon: <FileText /> },
+                 },
+                 {
+                   name: "lectures",
+                   list: "/lectures",
+                   create: "/lectures/create",
+                   edit: "/lectures/edit/:id",
+                   show: "/lectures/show/:id",
+                   meta: { label: "Lectures", icon: <Video /> },
+                 },
                 {
                   name: "subjects",
                   list: "/subjects",
@@ -129,11 +143,12 @@ function App() {
                   meta: { label: "Departments", icon: <Building2 /> },
                 },
                 {
-                  name: "users",
-                  list: "/faculty",
-                  show: "/faculty/show/:id",
-                  meta: { label: "Faculty", icon: <Users /> },
-                },
+                   name: "users",
+                   list: "/faculty",
+                   create: "/faculty/create",
+                   show: "/faculty/show/:id",
+                   meta: { label: "Faculty", icon: <Users /> },
+                 },
               ]}
             >
               <Routes>
@@ -216,24 +231,54 @@ function App() {
                     <Route path="show/:id" element={<AssignmentsShow />} />
                   </Route>
 
-                  {/* Submissions */}
-                  <Route path="submissions">
-                    <Route index element={<SubmissionsList />} />
-                    <Route
-                      path="create"
-                      element={
-                        <CanAccess
-                          resource="submissions"
-                          action="create"
-                          fallback={<AccessDenied />}
-                        >
-                          <SubmissionsCreate />
-                        </CanAccess>
-                      }
-                    />
-                  </Route>
+                   {/* Submissions */}
+                   <Route path="submissions">
+                     <Route index element={<SubmissionsList />} />
+                     <Route
+                       path="create"
+                       element={
+                         <CanAccess
+                           resource="submissions"
+                           action="create"
+                           fallback={<AccessDenied />}
+                         >
+                           <SubmissionsCreate />
+                         </CanAccess>
+                       }
+                     />
+                   </Route>
 
-                  {/* Subjects */}
+                   {/* Lectures */}
+                   <Route path="lectures">
+                     <Route index element={<LecturesList />} />
+                     <Route
+                       path="create"
+                       element={
+                         <CanAccess
+                           resource="lectures"
+                           action="create"
+                           fallback={<AccessDenied />}
+                         >
+                           <LecturesCreate />
+                         </CanAccess>
+                       }
+                     />
+                     <Route
+                       path="edit/:id"
+                       element={
+                         <CanAccess
+                           resource="lectures"
+                           action="edit"
+                           fallback={<AccessDenied />}
+                         >
+                           <LecturesEdit />
+                         </CanAccess>
+                       }
+                     />
+                     <Route path="show/:id" element={<LecturesShow />} />
+                   </Route>
+
+                   {/* Subjects */}
                   <Route path="subjects">
                     <Route index element={<SubjectsList />} />
                     <Route
@@ -283,6 +328,18 @@ function App() {
                     }
                   >
                     <Route index element={<FacultyList />} />
+                    <Route
+                      path="create"
+                      element={
+                        <CanAccess
+                          resource="users"
+                          action="create"
+                          fallback={<AccessDenied />}
+                        >
+                          <FacultyCreate />
+                        </CanAccess>
+                      }
+                    />
                     <Route path="show/:id" element={<FacultyShow />} />
                   </Route>
                 </Route>

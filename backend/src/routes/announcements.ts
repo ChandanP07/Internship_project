@@ -7,7 +7,7 @@ router.get("/", requireAuth(), async (_, res) => {
   res.json({ data: [] });
 });
 
-router.post("/", requireAuth(["teacher", "admin"]), async (req, res) => {
+router.post("/", requireAuth(["teacher"]), async (req, res) => {
   res.json({ success: true, body: req.body });
 });
 
