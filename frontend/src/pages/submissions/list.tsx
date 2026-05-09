@@ -1,6 +1,8 @@
 // LMS frontend module scaffold added
-import { useGetIdentity, useList } from "@refinedev/core";
+import { useGetIdentity, useList, useUpdate } from "@refinedev/core";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,24 +10,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { User } from "@/types";
 
 type SubmissionItem = {
   id: number;
   assignmentId: number;
   studentId: string;
+  submissionText?: string;
   fileUrl?: string;
-  grade?: number | null;
+  marks?: number | null;
   feedback?: string | null;
   status: string;
   submittedAt?: string;
-  assignment?: { id: number; title: string };
+  updatedAt?: string;
+  reviewedBy?: string;
+  gradedAt?: string;
+  assignment?: { id: number; title: string; dueDate?: string };
   student?: { id: string; name: string };
+  reviewer?: { id: string; name: string };
 };
 
 const SubmissionsList = () => {
   const { data: currentUser } = useGetIdentity<User>();
   const isStudent = currentUser?.role === "student";
+  const { mutate: updateSubmission } = useUpdate();
 
   const { query } = useList<SubmissionItem>({
     resource: isStudent ? "submissions/my" : "submissions",
@@ -34,6 +44,48 @@ const SubmissionsList = () => {
   });
 
   const submissions = query.data?.data ?? [];
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [gradeForm, setGradeForm] = useState({
+    marks: "",
+    feedback: "",
+    status: "graded",
+  });
+
+  const startGrading = (submission: SubmissionItem) => {
+    setEditingId(submission.id);
+    setGradeForm({
+      marks: submission.marks?.toString() || "",
+      feedback: submission.feedback || "",
+      status: submission.status === "graded" ? "graded" : "reviewed",
+    });
+  };
+
+  const cancelGrading = () => {
+    setEditingId(null);
+    setGradeForm({ marks: "", feedback: "", status: "graded" });
+  };
+
+  const submitGrade = () => {
+    if (!editingId) return;
+    updateSubmission(
+      {
+        resource: "submissions",
+        id: editingId,
+        values: {
+          marks: gradeForm.marks ? Number(gradeForm.marks) : null,
+          feedback: gradeForm.feedback || null,
+          status: gradeForm.status,
+        },
+      },
+      {
+        onSuccess: () => {
+          query.refetch();
+          cancelGrading();
+        },
+      }
+    );
+  };
 
   if (query.isLoading)
     return (
@@ -69,7 +121,12 @@ const SubmissionsList = () => {
                     {item.assignment?.title ?? `Assignment #${item.assignmentId}`}
                   </CardTitle>
                   <Badge
-                    variant={item.status === "graded" ? "default" : "secondary"}
+                    variant={
+                      item.status === "graded" ? "default" :
+                      item.status === "late" ? "destructive" :
+                      item.status === "reviewed" ? "secondary" :
+                      "outline"
+                    }
                     className="capitalize"
                   >
                     {item.status}
@@ -87,19 +144,79 @@ const SubmissionsList = () => {
                   </CardDescription>
                 )}
               </CardHeader>
-              {(item.grade != null || item.feedback) && (
-                <CardContent className="space-y-1 text-sm">
-                  {item.grade != null && (
-                    <p>
-                      Grade:{" "}
-                      <span className="font-medium">{item.grade}</span>
-                    </p>
-                  )}
-                  {item.feedback && (
-                    <p className="text-muted-foreground">{item.feedback}</p>
-                  )}
-                </CardContent>
-              )}
+              <CardContent className="space-y-3">
+                {item.submissionText && (
+                  <div className="text-sm">
+                    <p className="font-medium mb-1">Submission:</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{item.submissionText}</p>
+                  </div>
+                )}
+                {item.fileUrl && (
+                  <div className="text-sm">
+                    <p className="font-medium mb-1">File:</p>
+                    <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      {item.fileUrl}
+                    </a>
+                  </div>
+                )}
+                {(item.marks != null || item.feedback) && (
+                  <div className="text-sm space-y-1">
+                    {item.marks != null && (
+                      <p>
+                        Marks: <span className="font-medium">{item.marks}</span>
+                      </p>
+                    )}
+                    {item.feedback && (
+                      <div>
+                        <p className="font-medium mb-1">Feedback:</p>
+                        <p className="text-muted-foreground whitespace-pre-wrap">{item.feedback}</p>
+                      </div>
+                    )}
+                    {item.reviewer && (
+                      <p className="text-xs text-muted-foreground">
+                        Graded by {item.reviewer.name} on {item.gradedAt ? new Date(item.gradedAt).toLocaleDateString() : ''}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {!isStudent && editingId === item.id && (
+                  <div className="space-y-3 border-t pt-3">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Marks</label>
+                      <Input
+                        type="number"
+                        value={gradeForm.marks}
+                        onChange={(e) => setGradeForm(p => ({ ...p, marks: e.target.value }))}
+                        placeholder="Enter marks"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Feedback</label>
+                      <Textarea
+                        value={gradeForm.feedback}
+                        onChange={(e) => setGradeForm(p => ({ ...p, feedback: e.target.value }))}
+                        placeholder="Enter feedback"
+                        rows={2}
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={submitGrade} size="sm">
+                        Save
+                      </Button>
+                      <Button onClick={cancelGrading} variant="outline" size="sm">
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {!isStudent && editingId !== item.id && (
+                  <div className="flex gap-2 pt-2">
+                    <Button onClick={() => startGrading(item)} size="sm" variant="outline">
+                      {item.status === "graded" ? "Update Grade" : "Grade"}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           ))}
         </div>

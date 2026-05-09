@@ -21,4 +21,6 @@ export const submissions = pgTable("submissions", {
   status: text("status").default("submitted"),
   submittedAt: timestamp("submitted_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  reviewedBy: text("reviewed_by").references(() => user.id),
+  gradedAt: timestamp("graded_at"),
 });

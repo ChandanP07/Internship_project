@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { bannerPhoto } from "@/lib/cloudinary";
 import { ClassDetails, User } from "@/types";
-import { Users, GraduationCap, Building2, BookOpen, Key } from "lucide-react";
+import { Users, GraduationCap, Building2, BookOpen, Key, FileText } from "lucide-react";
 
 type ClassUser = {
   id: string;
@@ -53,6 +53,19 @@ const ClassesShow = () => {
     },
   });
   const assignments = assignmentsResult.data ?? [];
+
+  const assignmentIds = assignments.map(a => a.id);
+  const { result: submissionsResult } = useList<any>({
+    resource: "submissions",
+    filters: assignmentIds.length > 0 ? [
+      { field: "assignmentId", operator: "in", value: assignmentIds },
+    ] : [],
+    pagination: { pageSize: 100 }, // Get all submissions for stats
+    queryOptions: {
+      enabled: assignmentIds.length > 0,
+    },
+  });
+  const submissions = submissionsResult.data ?? [];
 
   const studentColumns = useMemo<ColumnDef<ClassUser>[]>(
     () => [
@@ -260,8 +273,111 @@ const ClassesShow = () => {
               </CardContent>
             </Card>
 
+            {(isAdmin || isTeacher) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="text-primary" /> Submission Overview
+                  </CardTitle>
+                  <CardDescription>Submission status across all assignments</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {assignments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No assignments to show submissions for.</p>
+                  ) : (
+                    assignments.map((assignment: any) => {
+                      const assignmentSubmissions = submissions.filter((s: any) => s.assignmentId === assignment.id);
+                      const submitted = assignmentSubmissions.filter((s: any) => s.status === 'submitted' || s.status === 'late').length;
+                      const graded = assignmentSubmissions.filter((s: any) => s.status === 'graded').length;
+                      const total = assignmentSubmissions.length; // This assumes we have all enrolled students, but we might not
+
+                      return (
+                        <div key={assignment.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{assignment.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Due {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : "N/A"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <div className="text-center">
+                              <p className="font-medium">{submitted}</p>
+                              <p className="text-xs text-muted-foreground">Submitted</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="font-medium">{graded}</p>
+                              <p className="text-xs text-muted-foreground">Graded</p>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/assignments/show/${assignment.id}`)}>
+                            View Details
+                          </Button>
+                        </div>
+                      );
+                    })
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {isStudent && (
-                 <Card className="bg-emerald-50 border-emerald-100 dark:bg-emerald-950 dark:border-emerald-900">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="text-primary" /> My Submissions
+                  </CardTitle>
+                  <CardDescription>Your submission status for class assignments</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {assignments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No assignments yet.</p>
+                  ) : (
+                    assignments.map((assignment: any) => {
+                      const mySubmission = submissions.find((s: any) =>
+                        s.assignmentId === assignment.id && s.studentId === currentUser?.id
+                      );
+
+                      return (
+                        <div key={assignment.id} className="flex items-center justify-between border rounded-lg px-3 py-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{assignment.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Due {assignment.dueDate ? new Date(assignment.dueDate).toLocaleString() : "N/A"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {mySubmission ? (
+                              <Badge
+                                variant={
+                                  mySubmission.status === "graded" ? "default" :
+                                  mySubmission.status === "late" ? "destructive" :
+                                  "secondary"
+                                }
+                                className="capitalize"
+                              >
+                                {mySubmission.status}
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline">Not Submitted</Badge>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/assignments/show/${assignment.id}`)}
+                            >
+                              {mySubmission ? "View" : "Submit"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {isStudent && (
+                  <Card className="bg-emerald-50 border-emerald-100 dark:bg-emerald-950 dark:border-emerald-900">
                     <CardContent className="flex items-center gap-4 py-8">
                         <div className="size-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center text-emerald-600">
                             <Users size={24} />

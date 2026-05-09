@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   useDelete,
   useGetIdentity,
+  useList,
   useNavigation,
   useShow,
   useUpdate,
@@ -31,6 +32,15 @@ type AssignmentRecord = {
   teacher?: { id: string; name: string; email: string };
 };
 
+type SubmissionRecord = {
+  id: number;
+  status: string;
+  marks?: number | null;
+  feedback?: string | null;
+  submittedAt?: string;
+  student?: { id: string; name: string };
+};
+
 const AssignmentsShow = () => {
   const { id } = useParams();
   const { data: currentUser } = useGetIdentity<User>();
@@ -45,7 +55,14 @@ const AssignmentsShow = () => {
     id,
   });
 
+  const { query: submissionsQuery } = useList<SubmissionRecord>({
+    resource: currentUser?.role === "student" ? "submissions/my" : "submissions",
+    filters: [{ field: "assignmentId", operator: "eq", value: id }],
+    queryOptions: { enabled: !!currentUser && !!id },
+  });
+
   const record = query.data?.data;
+  const submissions = submissionsQuery.data?.data ?? [];
   const canManage =
     currentUser?.role === "admin" || currentUser?.role === "teacher";
 
@@ -104,8 +121,89 @@ const AssignmentsShow = () => {
           )}
         </div>
 
+        {/* Submission Section */}
+        <div className="border-t pt-4">
+          <h3 className="text-lg font-semibold mb-3">Submissions</h3>
+          {currentUser?.role === "student" ? (
+            submissions.length > 0 ? (
+              <div className="space-y-2">
+                <Badge
+                  variant={
+                    submissions[0].status === "graded" ? "default" :
+                    submissions[0].status === "late" ? "destructive" :
+                    "secondary"
+                  }
+                  className="capitalize"
+                >
+                  {submissions[0].status}
+                </Badge>
+                {submissions[0].marks != null && (
+                  <p className="text-sm">
+                    Marks: <span className="font-medium">{submissions[0].marks}</span>
+                  </p>
+                )}
+                {submissions[0].feedback && (
+                  <div className="text-sm">
+                    <p className="font-medium mb-1">Feedback:</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{submissions[0].feedback}</p>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Submitted on {submissions[0].submittedAt ? new Date(submissions[0].submittedAt).toLocaleString() : 'Unknown'}
+                </p>
+              </div>
+            ) : (
+              <Button asChild>
+                <a href={`/submissions/create?assignmentId=${record.id}`}>
+                  Submit Assignment
+                </a>
+              </Button>
+            )
+          ) : (
+            // Teacher view
+            submissions.length > 0 ? (
+              <div className="space-y-2">
+                {submissions.map((sub) => (
+                  <Card key={sub.id}>
+                    <CardContent className="py-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{sub.student?.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Submitted: {sub.submittedAt ? new Date(sub.submittedAt).toLocaleString() : 'Unknown'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              sub.status === "graded" ? "default" :
+                              sub.status === "late" ? "destructive" :
+                              "secondary"
+                            }
+                            className="capitalize"
+                          >
+                            {sub.status}
+                          </Badge>
+                          {sub.marks != null && (
+                            <span className="text-sm font-medium">{sub.marks} marks</span>
+                          )}
+                        </div>
+                      </div>
+                      {sub.feedback && (
+                        <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">{sub.feedback}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No submissions yet.</p>
+            )
+          )}
+        </div>
+
         {canManage && (
-          <div className="flex gap-2 pt-2">
+          <div className="flex gap-2 pt-2 border-t">
             <Button
               variant="outline"
               disabled={isUpdating}

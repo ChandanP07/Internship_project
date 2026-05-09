@@ -17,6 +17,7 @@ import {
   Building2,
   ClipboardCheck,
   ClipboardList,
+  FileText,
   GraduationCap,
   Home,
   Users,
@@ -45,6 +46,8 @@ import EnrollmentsJoin from "./pages/enrollments/join";
 import AssignmentsList from "./pages/assignments/list";
 import AssignmentsCreate from "./pages/assignments/create";
 import AssignmentsShow from "./pages/assignments/show";
+import SubmissionsList from "./pages/submissions/list";
+import SubmissionsCreate from "./pages/submissions/create";
 import Profile from "./pages/profile";
 import { User } from "./types";
 
@@ -95,13 +98,20 @@ function App() {
                   list: "/enrollments",
                   meta: { label: "Enrollments", icon: <ClipboardCheck /> },
                 },
-                {
-                  name: "assignments",
-                  list: "/assignments",
-                  create: "/assignments/create",
-                  show: "/assignments/show/:id",
-                  meta: { label: "Assignments", icon: <ClipboardList /> },
-                },
+                 {
+                   name: "assignments",
+                   list: "/assignments",
+                   create: "/assignments/create",
+                   show: "/assignments/show/:id",
+                   meta: { label: "Assignments", icon: <ClipboardList /> },
+                 },
+                 {
+                   name: "submissions",
+                   list: "/submissions",
+                   create: "/submissions/create",
+                   show: "/submissions/show/:id",
+                   meta: { label: "Submissions", icon: <FileText /> },
+                 },
                 {
                   name: "subjects",
                   list: "/subjects",
@@ -173,25 +183,42 @@ function App() {
                     <Route path="join" element={<EnrollmentsJoin />} />
                   </Route>
 
-                  {/* Assignments */}
-                  <Route path="assignments">
-                    <Route index element={<AssignmentsList />} />
-                    <Route
-                      path="create"
-                      element={
-                        <CanAccess
-                          resource="assignments"
-                          action="create"
-                          fallback={<AccessDenied />}
-                        >
-                          <AssignmentsCreate />
-                        </CanAccess>
-                      }
-                    />
-                    <Route path="show/:id" element={<AssignmentsShow />} />
-                  </Route>
+                   {/* Assignments */}
+                   <Route path="assignments">
+                     <Route index element={<AssignmentsList />} />
+                     <Route
+                       path="create"
+                       element={
+                         <CanAccess
+                           resource="assignments"
+                           action="create"
+                           fallback={<AccessDenied />}
+                         >
+                           <AssignmentsCreate />
+                         </CanAccess>
+                       }
+                     />
+                     <Route path="show/:id" element={<AssignmentsShow />} />
+                   </Route>
 
-                  {/* Subjects */}
+                   {/* Submissions */}
+                   <Route path="submissions">
+                     <Route index element={<SubmissionsList />} />
+                     <Route
+                       path="create"
+                       element={
+                         <CanAccess
+                           resource="submissions"
+                           action="create"
+                           fallback={<AccessDenied />}
+                         >
+                           <SubmissionsCreate />
+                         </CanAccess>
+                       }
+                     />
+                   </Route>
+
+                   {/* Subjects */}
                   <Route path="subjects">
                     <Route index element={<SubjectsList />} />
                     <Route

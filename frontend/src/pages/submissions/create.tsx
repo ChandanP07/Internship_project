@@ -26,7 +26,7 @@ const SubmissionsCreate = () => {
   const [values, setValues] = useState({
     assignmentId: assignmentIdFromUrl,
     fileUrl: "",
-    notes: "",
+    submissionText: "",
   });
 
   if (currentUser?.role !== "student") {
@@ -51,7 +51,7 @@ const SubmissionsCreate = () => {
         values: {
           assignmentId: Number(values.assignmentId),
           fileUrl: values.fileUrl || undefined,
-          notes: values.notes || undefined,
+          submissionText: values.submissionText || undefined,
         },
       },
       {
@@ -92,13 +92,13 @@ const SubmissionsCreate = () => {
             />
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-medium">Notes (optional)</p>
+            <p className="text-sm font-medium">Submission Text (optional)</p>
             <Textarea
-              value={values.notes}
+              value={values.submissionText}
               onChange={(e) =>
-                setValues((p) => ({ ...p, notes: e.target.value }))
+                setValues((p) => ({ ...p, submissionText: e.target.value }))
               }
-              placeholder="Any notes for your teacher..."
+              placeholder="Your submission text..."
               rows={3}
             />
           </div>
