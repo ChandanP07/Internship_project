@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { User } from "@/types";
@@ -107,8 +108,14 @@ const SubmissionsList = () => {
 
       {submissions.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-sm text-muted-foreground">
-            No submissions found.
+          <CardContent className="py-12 text-center">
+            <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No submissions yet</h3>
+            <p className="text-sm text-muted-foreground">
+              {isStudent
+                ? "You haven't submitted any assignments yet."
+                : "No students have submitted assignments yet."}
+            </p>
           </CardContent>
         </Card>
       ) : (

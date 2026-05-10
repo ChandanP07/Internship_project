@@ -44,12 +44,22 @@ const Dashboard = () => {
   const { query: overviewQuery } = useCustom<any>({
     url: "stats/overview",
     method: "get",
+    queryOptions: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 2,
+    },
   });
 
   // Fetch role-specific latest activity
   const { query: latestQuery } = useCustom<any>({
     url: "stats/latest",
     method: "get",
+    queryOptions: {
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      refetchOnWindowFocus: false,
+      retry: 2,
+    },
   });
 
   // Fetch charts (Admin & Teacher)
@@ -58,6 +68,9 @@ const Dashboard = () => {
     method: "get",
     queryOptions: {
       enabled: role === "admin" || role === "teacher",
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: false,
+      retry: 2,
     },
   });
 

@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText } from "lucide-react";
 import type { User } from "@/types";
 
 type AssignmentItem = {
@@ -34,7 +36,38 @@ const AssignmentsList = () => {
   const canCreate = currentUser?.role === "teacher";
 
   if (query.isLoading)
-    return <p className="text-sm text-muted-foreground">Loading assignments...</p>;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64 mt-1" />
+          </div>
+        </div>
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-48 mt-1" />
+                  </div>
+                  <Skeleton className="h-6 w-16" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full mb-2" />
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
   if (query.isError)
     return <p className="text-sm text-red-500">Failed to load assignments.</p>;
 
@@ -58,8 +91,19 @@ const AssignmentsList = () => {
 
       {assignments.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-sm text-muted-foreground">
-            No assignments found.
+          <CardContent className="py-12 text-center">
+            <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No assignments yet</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {currentUser?.role === "student"
+                ? "Your teachers haven't posted any assignments yet."
+                : "Create your first assignment to get started."}
+            </p>
+            {canCreate && (
+              <Button asChild>
+                <Link to="/assignments/create">Create Assignment</Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (

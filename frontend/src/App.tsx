@@ -6,6 +6,7 @@ import routerProvider, {
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
+
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 import "./App.css";
 import { Toaster } from "./components/classora-ui/notification/toaster";

@@ -51,6 +51,8 @@ const ClassesShow = () => {
     pagination: { pageSize: 5 },
     queryOptions: {
       enabled: Number.isFinite(Number(classId)),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      refetchOnWindowFocus: false,
     },
   });
   const assignments = assignmentsResult.data ?? [];
@@ -64,6 +66,8 @@ const ClassesShow = () => {
     pagination: { pageSize: 100 }, // Get all submissions for stats
     queryOptions: {
       enabled: assignmentIds.length > 0,
+      staleTime: 1 * 60 * 1000, // 1 minute
+      refetchOnWindowFocus: false,
     },
   });
   const submissions = submissionsResult.data ?? [];
@@ -76,6 +80,8 @@ const ClassesShow = () => {
     pagination: { pageSize: 50 },
     queryOptions: {
       enabled: Number.isFinite(Number(classId)),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      refetchOnWindowFocus: false,
     },
   });
   const lectures = lecturesResult.data ?? [];

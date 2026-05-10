@@ -487,5 +487,143 @@
     { "classInviteCode": "bio301-research", "studentId": "student_10" },
     { "classInviteCode": "math301-applied", "studentId": "student_11" },
     { "classInviteCode": "cs202-practical", "studentId": "student_12" }
+  ],
+
+  "announcements": [
+    {
+      "classInviteCode": "cs101-a",
+      "title": "Welcome to the New Semester",
+      "content": "Welcome everyone. Please check assignments and lecture schedules regularly.",
+      "isPinned": true
+    },
+    {
+      "classInviteCode": "cs101-a",
+      "title": "Lab Session Update",
+      "content": "Lab sessions will now be conducted every Friday from 2 PM.",
+      "isPinned": false
+    },
+    {
+      "classInviteCode": "cs202-practical",
+      "title": "Database Mini Project",
+      "content": "Mini project guidelines have been uploaded in the assignments section.",
+      "isPinned": true
+    },
+    {
+      "classInviteCode": "cs201-bootcamp",
+      "title": "Frontend Workshop",
+      "content": "A React workshop will be conducted this weekend.",
+      "isPinned": false
+    }
+  ],
+
+  "assignments": [
+    {
+      "classInviteCode": "cs101-a",
+      "title": "C Programming Basics",
+      "description": "Solve all exercises related to loops and functions.",
+      "totalMarks": 100,
+      "dueDaysFromNow": 7,
+      "status": "published"
+    },
+    {
+      "classInviteCode": "cs202-practical",
+      "title": "Normalization Assignment",
+      "description": "Explain 1NF, 2NF and 3NF with examples.",
+      "totalMarks": 100,
+      "dueDaysFromNow": 10,
+      "status": "published"
+    },
+    {
+      "classInviteCode": "cs201-bootcamp",
+      "title": "Responsive Landing Page",
+      "description": "Build a responsive landing page using React and Tailwind.",
+      "totalMarks": 100,
+      "dueDaysFromNow": 5,
+      "status": "published"
+    },
+    {
+      "classInviteCode": "cs401-studio",
+      "title": "Software Engineering Sprint",
+      "description": "Create sprint planning and retrospective documents.",
+      "totalMarks": 100,
+      "dueDaysFromNow": 8,
+      "status": "draft"
+    }
+  ],
+
+  "lectures": [
+    {
+      "classInviteCode": "cs101-a",
+      "title": "Introduction to C Programming",
+      "description": "Basics of C language and program structure.",
+      "videoUrl": "https://www.youtube.com/watch?v=KJgsSFOSQv0",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
+      "notesUrl": "https://example.com/c-programming-notes.pdf"
+    },
+    {
+      "classInviteCode": "cs202-practical",
+      "title": "Introduction to DBMS",
+      "description": "Overview of database systems and relational models.",
+      "videoUrl": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1544383835-bda2bc66a55d",
+      "notesUrl": "https://example.com/dbms-notes.pdf"
+    },
+    {
+      "classInviteCode": "cs201-bootcamp",
+      "title": "React Fundamentals",
+      "description": "Learn components, props and state in React.",
+      "videoUrl": "https://www.youtube.com/watch?v=bMknfKXIFA8",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
+      "notesUrl": "https://example.com/react-notes.pdf"
+    },
+    {
+      "classInviteCode": "cs401-studio",
+      "title": "Software Engineering Workflow",
+      "description": "Agile workflows and team collaboration.",
+      "videoUrl": "https://www.youtube.com/watch?v=eIrMbAQSU34",
+      "thumbnailUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
+      "notesUrl": "https://example.com/software-engineering-notes.pdf"
+    }
+  ],
+
+  "submissions": [
+    {
+      "assignmentTitle": "C Programming Basics",
+      "studentId": "student_1",
+      "submissionText": "Completed all loop and function exercises successfully.",
+      "marks": 88,
+      "feedback": "Good logic implementation.",
+      "status": "graded"
+    },
+    {
+      "assignmentTitle": "C Programming Basics",
+      "studentId": "student_2",
+      "submissionText": "Submitted assignment with all required questions solved.",
+      "marks": 75,
+      "feedback": "Need better formatting.",
+      "status": "graded"
+    },
+    {
+      "assignmentTitle": "Normalization Assignment",
+      "studentId": "student_3",
+      "submissionText": "Explained normalization forms with examples.",
+      "marks": 92,
+      "feedback": "Excellent explanation.",
+      "status": "graded"
+    },
+    {
+      "assignmentTitle": "Responsive Landing Page",
+      "studentId": "student_4",
+      "submissionText": "Created responsive UI using Tailwind CSS.",
+      "marks": 81,
+      "feedback": "Good responsiveness.",
+      "status": "graded"
+    },
+    {
+      "assignmentTitle": "Responsive Landing Page",
+      "studentId": "student_5",
+      "submissionText": "Implemented responsive layout and reusable components.",
+      "status": "submitted"
+    }
   ]
 }

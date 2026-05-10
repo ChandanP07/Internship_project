@@ -44,9 +44,7 @@ const ClassesList = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<string>("all");
 
   const { data: currentUser } = useGetIdentity<User>();
-  const isTeacherOrAdmin =
-    currentUser?.role === "teacher" ||
-    currentUser?.role === "admin";
+  const isTeacher = currentUser?.role === "teacher";
   const classColumns = useMemo<ColumnDef<ClassListItem>[]>(
     () => [
       {
@@ -148,7 +146,7 @@ const ClassesList = () => {
               View
             </ShowButton>
 
-            {isTeacherOrAdmin && (
+            {isTeacher && (
               <EditButton
                 resource="classes"
                 recordItemId={row.original.id}

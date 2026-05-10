@@ -46,14 +46,22 @@ const FacultyShow = () => {
     resource: "classes",
     filters: [{ field: "teacherId", operator: "eq", value: userId }],
     pagination: { pageSize: 50 },
-    queryOptions: { enabled: !!userId },
+    queryOptions: {
+      enabled: !!userId,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
   });
 
   const { result: assignmentsResult } = useList<any>({
     resource: "assignments",
     filters: [{ field: "teacherId", operator: "eq", value: userId }],
     pagination: { pageSize: 100 },
-    queryOptions: { enabled: !!userId },
+    queryOptions: {
+      enabled: !!userId,
+      staleTime: 2 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
   });
 
   const user = query.data?.data;

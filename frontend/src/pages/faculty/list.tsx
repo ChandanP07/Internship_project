@@ -108,7 +108,6 @@ const FacultyList = () => {
 
   const facultyTable = useTable<User>({
     columns: facultyColumns,
-
     refineCoreProps: {
       resource: "users",
 
